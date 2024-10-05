@@ -72,7 +72,16 @@
 			{#each tabs as tab}
 				{#if !tab.nest && (tab.label != 'Blog' || (tab.label == 'Blog' && enableBlog))}
 					<Item href="javascript:void(0)" on:click={() => selectTab(tab)} on:touchstart={() => preloadData(tab.dest)} on:mouseover={() => preloadData(tab.dest)} activated={active == tab.dest} >
-						<Graphic class="material-icons{active == tab.dest ? "" : " nav-item"}" aria-hidden="true">{tab.icon}</Graphic>
+
+						{#if tab.icon === 'custom-guillotine'}
+							<Graphic class="material-icons{active == tab.dest ? "" : " nav-item"}" aria-hidden="true">
+								<svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs></defs><title>guillotine-glyph</title><path d="M435.2,512A12.8,12.8,0,0,0,448,499.2V76.8h25.6A12.8,12.8,0,0,0,486.4,64V12.8A12.8,12.8,0,0,0,473.6,0H38.4A12.8,12.8,0,0,0,25.6,12.8V64A12.8,12.8,0,0,0,38.4,76.8H64V499.2A12.8,12.8,0,0,0,76.8,512ZM140.8,76.8H243.2v44.8h-64a12.8,12.8,0,0,0-12.8,12.8v51.2a12.8,12.8,0,0,0,8.75,12.14l153.6,51.2A12.8,12.8,0,0,0,345.6,236.8V134.4a12.8,12.8,0,0,0-12.8-12.8h-64V76.8H371.2V384h-64a12.8,12.8,0,0,0-12.8,12.8,38.4,38.4,0,1,1-76.8,0A12.8,12.8,0,0,0,204.8,384h-64Z"/></svg>
+							</Graphic>
+						{:else}
+							<Graphic class="material-icons{active == tab.dest ? "" : " nav-item"}" aria-hidden="true">{tab.icon}</Graphic>
+						{/if}
+
+
 						<Text class="{active == tab.dest ? "" : "nav-item"}">{tab.label}</Text>
 					</Item>
 				{/if}
