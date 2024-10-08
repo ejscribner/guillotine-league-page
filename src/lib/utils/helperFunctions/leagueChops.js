@@ -4,8 +4,11 @@ import { getNflState } from "./nflState"
 import { waitForAll } from './multiPromise';
 import { get } from 'svelte/store';
 import {matchupsStore} from '$lib/stores';
+import {getStarterPositions} from '$lib/utils/helperFunctions/predictOptimalScore.js';
+import {setBestBallLineups} from '$lib/utils/helperFunctions/leagueMatchups.js';
 
-export const getLeagueChops = async (period, startWeek) => {
+export const getLeagueChops = async (period, startWeek, playersData) => {
+	// todo: new store for caching
 	// if(get(matchupsStore).matchupWeeks) {
 	// 	return get(matchupsStore);
 	// }
@@ -42,6 +45,15 @@ export const getLeagueChops = async (period, startWeek) => {
 	}
 	const matchupsData = await waitForAll(...matchupsJsonPromises).catch((err) => { console.error(err); }).catch((err) => { console.error(err); });
 
+	const playersMap = await playersData;
+
+	const newMatchupsData = setBestBallLineups(matchupsData, playersMap, await getStarterPositions(leagueData));
+	// console.log('ABCDEFG')
+	// console.log(matchupsData)
+	// console.log(newMatchupsData)
+	// console.log('HIJKLMNOP')
+
+
 	// console.log(matchupsData);
 
 	const chopPeriods = [];
@@ -49,11 +61,13 @@ export const getLeagueChops = async (period, startWeek) => {
 	let periodCounter = 1;
 	// todo: we need to fix this loop up, its not right
 	for(let i = startWeek - 1; periodCounter <= numChopPeriods; i += period) { // iterating each chop period
-		const processed = processChops(matchupsData[i], matchupsData[i + 1], periodCounter);
+		const processed = processChops(newMatchupsData[i], newMatchupsData[i + 1], periodCounter);
 		if(processed) {
 			chopPeriods.push({
 				teams: processed.teams,
-				chopNumber: processed.chopNumber
+				chopNumber: processed.chopNumber,
+				weekA: i + 1,
+				weekB: i + 2,
 			});
 		}
 		periodCounter++;

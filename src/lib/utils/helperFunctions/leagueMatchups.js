@@ -6,7 +6,7 @@ import { get } from 'svelte/store';
 import {matchupsStore} from '$lib/stores';
 import {getStarterPositions} from '$lib/utils/helperFunctions/predictOptimalScore.js';
 
-const setBestBallLineups = (matchupsData, playersMap, starterPositions) => {
+export const setBestBallLineups = (matchupsData, playersMap, starterPositions) => {
 	// players[string-id], players_points{id: pts} starters[string-id], starter_points[scores]
 	// starter data sometimes not there, so check for null
 	/*

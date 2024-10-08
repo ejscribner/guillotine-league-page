@@ -5,6 +5,7 @@
     import TeamEntry from '$lib/Chops/TeamEntry.svelte';
 
     export let queryWeek, players, chopPeriods, matchupWeeks, year, week, regularSeasonLength, selection, leagueTeamManagers;
+    console.log(chopPeriods)
 
     let displayWeek = queryWeek * 1 || 1;
 
@@ -32,6 +33,7 @@
 
     let matchupArray = [];
     let teamArray = [];
+    let weekA, weekB;
 
     // rand is used as a hacky way to make sure that the each block re-renders when the matchupArray changes
     // the new arrays are too similar to the old ones for Svelte to pick up the difference
@@ -51,6 +53,9 @@
       // console.log(chopPeriods)
       console.log('PROCESSING AND DISPLAYING CHOPS')
       const chop = chopPeriods[newWeek-1];
+
+      weekA = chop.weekA;
+      weekB = chop.weekB;
 
       teamArray = chop.teams
 
@@ -147,6 +152,6 @@
         {/if}
     </div>
     {#each teamArray as team, ix (rand * (ix + 1))}
-        <TeamEntry {ix} {team} {players} {displayWeek} bind:active={active} {leagueTeamManagers} />
+        <TeamEntry {ix} {team} {players} {displayWeek} bind:active={active} {leagueTeamManagers} {weekA} {weekB}/>
     {/each}
 </div>

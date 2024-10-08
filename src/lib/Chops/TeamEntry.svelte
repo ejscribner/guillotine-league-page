@@ -4,9 +4,9 @@
     import clsx from 'clsx';
     import {Icon} from '@smui/tab';
 
-    export let team, players, active, ix, displayWeek, expandOverride=false, matchupWeek, leagueTeamManagers, year;
+    export let team, players, active, ix, displayWeek, expandOverride=false, matchupWeek, leagueTeamManagers, year, weekA, weekB;
 
-    console.log(team)
+    console.log(team) // team == matchup[0] essentially
 
     // let home = matchup[0];
     // let away = matchup[1];
@@ -14,6 +14,9 @@
     let homePointsA = team.pointsA.reduce((a, b) => a + b, 0);
     let homePointsB = team.pointsB.reduce((a, b) => a + b, 0);
     let homePointsTotal = homePointsA + homePointsB;
+
+    console.log(team)
+    
     let homeProjectionTotal = 0;
     let awayPointsTotal = 0;
     let awayProjectionTotal = 0;
@@ -26,33 +29,41 @@
         team.manager = getTeamFromTeamManagers(leagueTeamManagers, team.roster_id, year);
         team.isEliminated = isTeamEliminated(leagueTeamManagers, team.roster_id, year)
 
-    //     away.manager = getTeamFromTeamManagers(leagueTeamManagers, away.roster_id, year);
-    //     const homeStarters = matchupWeek ? home.starters[matchupWeek] : home.starters;
-    //     const awayStarters = matchupWeek ? away.starters[matchupWeek] : away.starters;
-    //     const homePoints = matchupWeek ? home.points[matchupWeek] : home.points;
-    //     const awayPoints = matchupWeek ? away.points[matchupWeek] : away.points;
+        // away.manager = getTeamFromTeamManagers(leagueTeamManagers, away.roster_id, year);
+        const startersA = matchupWeek ? team.startersA[matchupWeek] : team.startersA ?? [];
+        const startersB = matchupWeek ? team.startersB[matchupWeek] : team.startersB ?? [];
+        console.log(team)
+        if (startersA.length === 0) {
+            team.starters = [];
+        }
+        // const awayStarters = matchupWeek ? away.starters[matchupWeek] : away.starters;
+        const pointsA = matchupWeek ? team.pointsA[matchupWeek] : team.pointsA;
+        const pointsB = matchupWeek ? team.pointsB[matchupWeek] : team.pointsB;
+        // const awayPoints = matchupWeek ? away.points[matchupWeek] : away.points;
     //
-    //     homePointsTotal = 0;
-    //     homeProjectionTotal = 0;
-    //     awayPointsTotal = 0;
-    //     awayProjectionTotal = 0;
+        homePointsTotal = 0;
+        homeProjectionTotal = 0;
+        awayPointsTotal = 0;
+        awayProjectionTotal = 0;
     //
-    //     const localStarters = [];
-    //     for(let i = 0; i < homeStarters.length; i++) {
-    //         homePointsTotal += homePoints[i];
-    //         const awayPoint = awayPoints ? awayPoints[i] : 0;
-    //         awayPointsTotal += awayPoint;
-    //         const home = digestStarter(homeStarters[i], homePoints[i]);
-    //         const awayStarter = awayStarters ? awayStarters[i] : null;
-    //         const away = digestStarter(awayStarter, awayPoint);
-    //         homeProjectionTotal += home.projection;
-    //         awayProjectionTotal += away ? away.projection : 0;
-    //         localStarters.push({home, away});
-    //     }
-    //     if(awayPointsTotal < homePointsTotal) winning = "home";
-    //     if(awayPointsTotal > homePointsTotal) winning = "away";
-    //     if(awayPointsTotal == homePointsTotal) winning = "tied";
-    //     starters = localStarters;
+        const localStarters = [];
+        for(let i = 0; i < startersA.length; i++) {
+            homePointsTotal += pointsA[i];
+            // const awayPoint = awayPoints ? awayPoints[i] : 0;
+            // awayPointsTotal += awayPoint;
+            const home = digestStarter(startersA[i], pointsA[i]);
+            console.log(team.manager)
+            console.log(home)
+            // const awayStarter = awayStarters ? awayStarters[i] : null;
+            // const away = digestStarter(awayStarter, awayPoint);
+            homeProjectionTotal += home.projection;
+            // awayProjectionTotal += away ? away.projection : 0;
+            localStarters.push({home});
+        }
+        // if(awayPointsTotal < homePointsTotal) winning = "home";
+        // if(awayPointsTotal > homePointsTotal) winning = "away";
+        // if(awayPointsTotal == homePointsTotal) winning = "tied";
+        starters = localStarters;
     }
 
     const digestStarter = (starter, points) => {
@@ -70,15 +81,17 @@
             const player = players[starter];
             let name = player.pos == "DEF" ? player.ln : `${player.fn[0]}. ${player.ln}`;
             let projection = 0;
-            if(player.wi && player.wi[displayWeek]) {
-                projection = parseFloat(player.wi[displayWeek].p);
+            if(player.wi && player.wi[weekA]) {
+                console.log(player)
+                console.log(weekA)
+                projection = parseFloat(player.wi[weekA].p);
             }
             return {
                 name,
                 avatar: player.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`,
                 pos: player.pos,
                 team: player.t,
-                opponent: player.wi && player.wi[displayWeek] ? player.wi[displayWeek].o : null,
+                opponent: player.wi && player.wi[weekA] ? player.wi[weekA].o : null,
                 projection,
                 points,
             };
