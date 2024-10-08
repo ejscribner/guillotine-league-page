@@ -8,10 +8,15 @@
 
 	$: team = leagueTeamManagers.teamManagersMap[leagueTeamManagers.currentSeason][roster.roster_id].team;
 
+  // console.log(startersAndReserve)
+  // console.log(roster)
+
 	let i = 0;
 
 	const digestData = (passedPlayers, rawPlayers, startingPlayers = false, reserve = false) => {
 		let digestedRoster = [];
+
+    // todo: passedPlayers has the positions, but not the scores. Its reconciled here on each page, but prob should do it upstream
 
 		for(const singlePlayer of rawPlayers) {
 			if(!startingPlayers && !reserve && startersAndReserve.includes(singlePlayer)) {
@@ -57,6 +62,7 @@
 				default:
 					break;
 			}
+      
 			player = {
 				name: `${passedPlayers[singlePlayer].fn} ${passedPlayers[singlePlayer].ln}${injury ? `<span class="injury ${injury}">${injury}</span>` : ""}`,
                 nickname: roster.metadata && roster.metadata[`p_nick_${singlePlayer}`] ? roster.metadata[`p_nick_${singlePlayer}`] : null,

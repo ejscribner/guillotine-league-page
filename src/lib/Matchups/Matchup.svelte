@@ -19,8 +19,14 @@
         away = matchup[1];
         home.manager = getTeamFromTeamManagers(leagueTeamManagers, home.roster_id, year);
         away.manager = getTeamFromTeamManagers(leagueTeamManagers, away.roster_id, year);
-        const homeStarters = matchupWeek ? home.starters[matchupWeek] : home.starters;
-        const awayStarters = matchupWeek ? away.starters[matchupWeek] : away.starters;
+        const homeStarters = matchupWeek ? home.starters[matchupWeek] : home.starters ?? [];
+        if (homeStarters.length === 0) {
+            home.starters = []
+        }
+        const awayStarters = matchupWeek ? away.starters[matchupWeek] : away.starters ?? [];
+        if (awayStarters.length === 0) {
+            away.starters = []
+        }
         const homePoints = matchupWeek ? home.points[matchupWeek] : home.points;
         const awayPoints = matchupWeek ? away.points[matchupWeek] : away.points;
 
@@ -28,6 +34,7 @@
         homeProjectionTotal = 0;
         awayPointsTotal = 0;
         awayProjectionTotal = 0;
+
 
         const localStarters = [];
         for(let i = 0; i < homeStarters.length; i++) {
@@ -47,7 +54,10 @@
         starters = localStarters;
     }
 
+    // todo: figure out how this one looks up the players based on their id
+    // starter is the players id, players[starter] is the player, and points is the actual points
     const digestStarter = (starter, points) => {
+        // console.log(starter)
         if(!starter || starter == 0) {
                 return {
                     name: "Empty",
@@ -60,6 +70,10 @@
                 };
             }
             const player = players[starter];
+            // below has rpojected
+            // console.log(player)
+        // and points is the actual
+        //     console.log(points)
             let name = player.pos == "DEF" ? player.ln : `${player.fn[0]}. ${player.ln}`;
             let projection = 0;
             if(player.wi && player.wi[displayWeek]) {
