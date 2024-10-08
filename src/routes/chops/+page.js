@@ -5,8 +5,8 @@ export async function load({ url, fetch }) {
 
 
     // being set incorrectly by the nav
-    console.log('8989898')
-    console.log(queryWeek)
+    // console.log('8989898')
+    // console.log(queryWeek)
     
     return {
         queryWeek: isNaN(queryWeek) ? null : queryWeek,

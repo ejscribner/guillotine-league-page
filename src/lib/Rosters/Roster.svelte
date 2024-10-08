@@ -12,7 +12,7 @@
 
 	const digestData = (passedPlayers, rawPlayers, startingPlayers = false, reserve = false) => {
 		let digestedRoster = [];
-	
+
 		for(const singlePlayer of rawPlayers) {
 			if(!startingPlayers && !reserve && startersAndReserve.includes(singlePlayer)) {
 				continue;
@@ -37,6 +37,9 @@
 			}
 
 			let injury = null;
+			if (!passedPlayers[singlePlayer]) {
+        return;
+			}
 			switch (passedPlayers[singlePlayer].is) {
 				case "Questionable":
 					injury = "Q";

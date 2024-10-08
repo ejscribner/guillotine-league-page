@@ -12,7 +12,7 @@
 
     let loading = true;
 
-  console.log(chopsData)
+  // console.log(chopsData)
 
     onMount(async () => {
         const matchupsInfo = await matchupsData;
