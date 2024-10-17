@@ -47,12 +47,28 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
 
 	const playersMap = await playersData;
 
-	const newMatchupsData = setBestBallLineups(matchupsData, playersMap, await getStarterPositions(leagueData));
+
+	// todo: can we get the projections here, so we can sort by them
+	const newMatchupsData = setBestBallLineups(matchupsData, playersMap, await getStarterPositions(leagueData), week);
 	// console.log('ABCDEFG')
 	// console.log(matchupsData)
-	// console.log(newMatchupsData)
+	console.log(newMatchupsData)
 	// console.log('HIJKLMNOP')
 
+	// newMatchupsData.map((week) => {
+	// 	return week.sort((teamA, teamB) => {
+	// 		// First, compare by points
+	// 		if (teamA.points !== teamB.points) {
+	// 			return teamB.points - teamA.points; // Sort by points descending
+	// 		}
+	//
+	// 		// If points are the same, compare by projected_points
+	// 		return teamB.projected_points - teamA.projected_points; // Sort by projected points descending
+	// 	});
+	// });
+	// todo: this sorts by week though? we need to do two week pairs. Should we sort after the chopPeriods instead?
+
+	console.log(newMatchupsData)
 
 	// console.log(matchupsData);
 
@@ -68,6 +84,7 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
 				chopNumber: processed.chopNumber,
 				weekA: i + 1,
 				weekB: i + 2,
+				// todo: add more params here, then sort on them
 			});
 		}
 		periodCounter++;
@@ -81,7 +98,7 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
 
 	matchupsStore.update(() => matchupsResponse);
 
-	// console.log(matchupsResponse)
+	console.log(matchupsResponse)
 
 	return matchupsResponse;
 }
@@ -102,16 +119,40 @@ const processChops = (weekA, weekB, chopNumber) => {
 		// Find the corresponding team in weekB by roster_id
 		const teamB = weekB.find(team => team.roster_id === teamA.roster_id);
 
+		// TODO: sort with these
+		console.log(teamA.projected_points)
+		console.log(teamB.projected_points)
+		const totalProjectedPoints = teamA.projected_points + teamB.projected_points;
+		console.log(teamA.starters_points.reduce((a, b) => a + b, 0))
+		console.log(teamB.starters_points.reduce((a, b) => a + b, 0))
+		const totalPoints = teamA.starters_points.reduce((a, b) => a + b, 0) + teamB.starters_points.reduce((a, b) => a + b, 0);
+
 		// Ensure the team exists in both weeks
 		if (teamB) {
+			const totalProjectedPoints = teamA.projected_points + teamB.projected_points;
+			const totalPointsA = teamA.starters_points.reduce((a, b) => a + b, 0);
+			const totalPointsB = teamB.starters_points.reduce((a, b) => a + b, 0);
+			const totalPoints = totalPointsA + totalPointsB;
+
 			teams.push({
 				roster_id: teamA.roster_id,
 				startersA: teamA.starters,
 				startersB: teamB.starters, // Use starters from weekB
 				pointsA: teamA.starters_points,
 				pointsB: teamB.starters_points, // Use points from weekB
+				totalPoints: totalPoints, // Store totalPoints
+				totalProjectedPoints: totalProjectedPoints // Store totalProjectedPoints
 			});
 		}
+
+		// Sort teams based on totalPoints first, if equal or 0, then totalProjectedPoints
+		teams.sort((a, b) => {
+			if (a.totalPoints !== b.totalPoints) {
+				return b.totalPoints - a.totalPoints; // Sort by totalPoints descending
+			} else {
+				return b.totalProjectedPoints - a.totalProjectedPoints; // Sort by totalProjectedPoints descending
+			}
+		});
 	}
 	return {teams, chopNumber};
 }

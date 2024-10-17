@@ -6,7 +6,7 @@ import { get } from 'svelte/store';
 import {matchupsStore} from '$lib/stores';
 import {getStarterPositions} from '$lib/utils/helperFunctions/predictOptimalScore.js';
 
-export const setBestBallLineups = (matchupsData, playersMap, starterPositions) => {
+export const setBestBallLineups = (matchupsData, playersMap, starterPositions, weekNumber) => {
 	// players[string-id], players_points{id: pts} starters[string-id], starter_points[scores]
 	// starter data sometimes not there, so check for null
 	/*
@@ -24,11 +24,18 @@ export const setBestBallLineups = (matchupsData, playersMap, starterPositions) =
 	// for (const week of matchupsData) {
 	for (let weekIdx = 0; weekIdx < matchupsData.length; weekIdx++) {
 		const week = matchupsData[weekIdx];
-		console.log(week)
+		console.log(weekIdx + 1)
+		console.log(weekNumber)
 		// for (const team of week) {
 		for (let teamIdx = 0; teamIdx < week.length; teamIdx++) {
+			let totalProjectedPoints = 0;
 			const team = week[teamIdx];
-			if (!team.starters && team.players && team.players_points) {
+			console.log('YO')
+			console.log(team)
+			// todo: team.starters no longer null anywhere?
+			// try instead comparing current week with index
+			// todo: check >=
+			if ((!team.starters || weekIdx + 1 >= weekNumber) && team.players && team.players_points) {
 				let newStarters = new Array(starterPositions.length).fill(0);
 				// positionsTracker looks like this at start ['QB', 'RB', 'RB', 'WR', 'WR', 'TE', 'FLEX', 'FLEX']
 				let positionsTracker = Array.from(starterPositions);
@@ -45,7 +52,7 @@ export const setBestBallLineups = (matchupsData, playersMap, starterPositions) =
 
 				}).sort((a, b) => b.projectedPoints - a.projectedPoints); // sort by points descending
 
-				console.log(teamPlayers)
+				// console.log(teamPlayers)
 				teamPlayers.forEach((player) => {
 					if (player) {
 						const playerPositionIdx = positionsTracker.indexOf(player.player.pos);
@@ -54,6 +61,7 @@ export const setBestBallLineups = (matchupsData, playersMap, starterPositions) =
 							// Fill in the core position (QB, RB, WR, TE)
 							newStarters[playerPositionIdx] = player.playerId;
 							positionsTracker[playerPositionIdx] = null; // Mark the position as filled
+							totalProjectedPoints += player.projectedPoints;
 						} else if (['RB', 'WR', 'TE'].includes(player.player.pos)) {
 							// If core position is filled, try to fill a FLEX spot
 							const flexPositionIdx = positionsTracker.indexOf('FLEX');
@@ -61,15 +69,17 @@ export const setBestBallLineups = (matchupsData, playersMap, starterPositions) =
 								// Fill in the FLEX position
 								newStarters[flexPositionIdx] = player.playerId;
 								positionsTracker[flexPositionIdx] = null; // Mark the FLEX spot as filled
+								totalProjectedPoints += player.projectedPoints;
 							}
 						}
 					}
 
 				})
-				console.log(newStarters)
+				// console.log(newStarters)
 
 				localMatchupsData[weekIdx][teamIdx].starters = newStarters;
 				localMatchupsData[weekIdx][teamIdx].starters_points = new Array(newStarters.length).fill(0);
+				localMatchupsData[weekIdx][teamIdx].projected_points = totalProjectedPoints;
 
 			} else if (team.starters && team.players && team.players_points) { // todo: better logic here
 				// HANDLE THE CASE WHERE THE STARTERS ARE ALREADY SET, not use proj
@@ -89,7 +99,7 @@ export const setBestBallLineups = (matchupsData, playersMap, starterPositions) =
 					// console.log(player.player.pos)
 					// console.log(newStarters[starterPositions.indexOf(player.player.pos)])
 					if (newStarters[starterPositions.indexOf(player.player.pos)] === 0) {
-						console.log('start')
+						// console.log('start')
 						// todo: check this once we have some data for the week
 						// todo: handle starter_pointsf
 						newStarters[starterPositions.indexOf(player.player.pos)] = player.player.id;
@@ -97,7 +107,7 @@ export const setBestBallLineups = (matchupsData, playersMap, starterPositions) =
 				})
 			}
 		}
-		console.log('---')
+		// console.log('---')
 	}
 
 	return localMatchupsData;
@@ -144,11 +154,11 @@ export const getLeagueMatchups = async (playersData) => {
 
 	const playersMap = await playersData;
 
-	const newMatchupsData = setBestBallLineups(matchupsData, playersMap, await getStarterPositions(leagueData));
-	console.log('ABCDEFG')
-	console.log(matchupsData)
-	console.log(newMatchupsData)
-	console.log('HIJKLMNOP')
+	const newMatchupsData = setBestBallLineups(matchupsData, playersMap, await getStarterPositions(leagueData), week);
+	// console.log('ABCDEFG')
+	// console.log(matchupsData)
+	// console.log(newMatchupsData)
+	// console.log('HIJKLMNOP')
 
 
 	const matchupWeeks = [];

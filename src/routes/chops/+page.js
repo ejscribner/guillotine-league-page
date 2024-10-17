@@ -6,6 +6,11 @@ export async function load({ url, fetch }) {
     const playersData = loadPlayers(fetch);
 
     const matchupsData = getLeagueMatchups(playersData);
+    // matchupsData knows the week
+
+    console.log('****')
+    console.log(matchupsData)
+    
     // being set incorrectly by the nav
     // console.log('8989898')
     // console.log(queryWeek)

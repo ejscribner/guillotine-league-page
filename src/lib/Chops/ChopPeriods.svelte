@@ -5,7 +5,7 @@
     import TeamEntry from '$lib/Chops/TeamEntry.svelte';
 
     export let queryWeek, players, chopPeriods, matchupWeeks, year, week, regularSeasonLength, selection, leagueTeamManagers;
-    console.log(chopPeriods)
+    // console.log(chopPeriods)
 
     let displayWeek = queryWeek * 1 || 1;
 
@@ -27,7 +27,7 @@
             return;
         }
         // processDisplayMatchup(displayWeek)
-        console.log('processing the chops')
+        // console.log('processing the chops')
         processDisplayChop(displayWeek)
     })
 
@@ -51,7 +51,7 @@
 
   const processDisplayChop = (newWeek) => {
       // console.log(chopPeriods)
-      console.log('PROCESSING AND DISPLAYING CHOPS')
+      // console.log('PROCESSING AND DISPLAYING CHOPS')
       const chop = chopPeriods[newWeek-1];
 
       weekA = chop.weekA;
@@ -59,18 +59,20 @@
 
       teamArray = chop.teams
 
-      console.log(teamArray)
+      // console.log(teamArray)
 
-      teamArray.sort((a, b) => {
-          // Ensure eliminated teams are always at the end
-          if (a.isEliminated && !b.isEliminated) return 1;
-          if (!a.isEliminated && b.isEliminated) return -1;
-
-          // Now handle the points comparison
-          const totalA = a.pointsA.reduce((acc, cur) => acc + cur, 0) + a.pointsB.reduce((acc, cur) => acc + cur, 0);
-          const totalB = b.pointsA.reduce((acc, cur) => acc + cur, 0) + b.pointsB.reduce((acc, cur) => acc + cur, 0);
-          return totalB - totalA;
-      });
+      // teamArray.sort((a, b) => {
+      //     // Ensure eliminated teams are always at the end
+      //     if (a.isEliminated && !b.isEliminated) return 1;
+      //     if (!a.isEliminated && b.isEliminated) return -1;
+      //
+      //     console.log(a)
+      //
+      //     // Now handle the points comparison
+      //     const totalA = a.pointsA.reduce((acc, cur) => acc + cur, 0) + a.pointsB.reduce((acc, cur) => acc + cur, 0);
+      //     const totalB = b.pointsA.reduce((acc, cur) => acc + cur, 0) + b.pointsB.reduce((acc, cur) => acc + cur, 0);
+      //     return totalB - totalA;
+      // });
 
       rand = Math.random();
   }
@@ -135,6 +137,29 @@
             font-size: 1.2em;
         }
     }
+
+    .chopHeader {
+        display: flex;
+        flex-direction: column;
+        width: 95%;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .weekLabels {
+        display: flex;
+        gap: 20px;
+        padding: 1px 2%;
+    }
+
+    .weekLabel {
+        width: 68px;
+        text-align: right;
+    }
+
+    .teamNameLabel {
+        flex-grow: 1;
+    }
 </style>
 
 <div class="matchups">
@@ -150,6 +175,15 @@
         {:else}
             <span class="spacer" />
         {/if}
+    </div>
+    <div class="chopHeader">
+        <p>Chop #{displayWeek} is a two-week period where the team with the lowest combined score from weeks {weekA} and {weekB} is eliminated.</p>
+        <div class="weekLabels">
+            <p class="teamNameLabel">Team Name</p>
+            <p class="weekLabel">Week {weekA}</p>
+            <p class="weekLabel">Week {weekB}</p>
+            <p class="weekLabel">Total</p>
+        </div>
     </div>
     {#each teamArray as team, ix (rand * (ix + 1))}
         <TeamEntry {ix} {team} {players} {displayWeek} bind:active={active} {leagueTeamManagers} {weekA} {weekB}/>

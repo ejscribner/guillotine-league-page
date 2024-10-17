@@ -15,9 +15,10 @@
     let homePointsB = team.pointsB.reduce((a, b) => a + b, 0);
     let homePointsTotal = homePointsA + homePointsB;
 
-    console.log(team)
+    // console.log(team)
     
-    let homeProjectionTotal = 0;
+    let projectionATotal = 0;
+    let projectionBTotal = 0;
     let awayPointsTotal = 0;
     let awayProjectionTotal = 0;
 
@@ -32,7 +33,7 @@
         // away.manager = getTeamFromTeamManagers(leagueTeamManagers, away.roster_id, year);
         const startersA = matchupWeek ? team.startersA[matchupWeek] : team.startersA ?? [];
         const startersB = matchupWeek ? team.startersB[matchupWeek] : team.startersB ?? [];
-        console.log(team)
+        // console.log(team)
         if (startersA.length === 0) {
             team.starters = [];
         }
@@ -41,24 +42,28 @@
         const pointsB = matchupWeek ? team.pointsB[matchupWeek] : team.pointsB;
         // const awayPoints = matchupWeek ? away.points[matchupWeek] : away.points;
     //
-        homePointsTotal = 0;
-        homeProjectionTotal = 0;
+    //     homePointsTotal = 0;
+        projectionATotal = 0;
+        projectionBTotal = 0;
         awayPointsTotal = 0;
         awayProjectionTotal = 0;
     //
         const localStarters = [];
         for(let i = 0; i < startersA.length; i++) {
-            homePointsTotal += pointsA[i];
+            // homePointsTotal += pointsA[i];
             // const awayPoint = awayPoints ? awayPoints[i] : 0;
             // awayPointsTotal += awayPoint;
-            const home = digestStarter(startersA[i], pointsA[i]);
-            console.log(team.manager)
-            console.log(home)
+            const home = digestStarter(startersA[i], pointsA[i], weekA);
+            const away = digestStarter(startersB[i], pointsB[i], weekB);
+            // console.log(team.manager)
+            // console.log(home)
+            // console.log(away)
             // const awayStarter = awayStarters ? awayStarters[i] : null;
             // const away = digestStarter(awayStarter, awayPoint);
-            homeProjectionTotal += home.projection;
+            projectionATotal += home.projection;
+            projectionBTotal += away.projection;
             // awayProjectionTotal += away ? away.projection : 0;
-            localStarters.push({home});
+            localStarters.push({home, away});
         }
         // if(awayPointsTotal < homePointsTotal) winning = "home";
         // if(awayPointsTotal > homePointsTotal) winning = "away";
@@ -66,7 +71,7 @@
         starters = localStarters;
     }
 
-    const digestStarter = (starter, points) => {
+    const digestStarter = (starter, points, week) => {
         if(!starter || starter == 0) {
                 return {
                     name: "Empty",
@@ -81,17 +86,17 @@
             const player = players[starter];
             let name = player.pos == "DEF" ? player.ln : `${player.fn[0]}. ${player.ln}`;
             let projection = 0;
-            if(player.wi && player.wi[weekA]) {
-                console.log(player)
-                console.log(weekA)
-                projection = parseFloat(player.wi[weekA].p);
+            if(player.wi && player.wi[week]) {
+                // console.log(player)
+                // console.log(week)
+                projection = parseFloat(player.wi[week].p);
             }
             return {
                 name,
                 avatar: player.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`,
                 pos: player.pos,
                 team: player.t,
-                opponent: player.wi && player.wi[weekA] ? player.wi[weekA].o : null,
+                opponent: player.wi && player.wi[week] ? player.wi[week].o : null,
                 projection,
                 points,
             };
@@ -125,7 +130,8 @@
             multiplier = 71;
         }
         const startersLength = matchupWeek ? team.startersA[matchupWeek].length : team.startersA.length;
-        return startersLength * multiplier + 37;
+        return startersLength * multiplier + 37 + 35;
+        // 37 is height of the close button, 35 is the height of the header
     }
 
 </script>
@@ -144,10 +150,23 @@
         justify-content: space-between;
         position: relative;
         border: 1px solid #bbb;
-        border-radius: 10px;
+        border-radius: 8px;
         opacity: 0.8;
         cursor: pointer;
-		transition: opacity 0.5s;
+		    transition: opacity 0.5s;
+        overflow: hidden;
+    }
+
+    .header-expanded {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        border: 1px solid #bbb;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        opacity: 0.8;
+        cursor: pointer;
+        transition: opacity 0.5s;
         overflow: hidden;
     }
 
@@ -288,12 +307,13 @@
     .rosters {
         position: relative;
         background-color: var(--fff);
-        border-radius: 8px;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
         overflow: hidden;
         border-left: 1px solid #bbb;
         border-right: 1px solid #bbb;
         border-bottom: 1px solid #bbb;
-		transition: max-height 0.4s;
+		    transition: max-height 0.4s;
     }
 
     .line {
@@ -441,11 +461,13 @@
     }
 
     .totalPointsR {
+        width: 54px;
         margin-right: 0.1em;
         text-align: right;
     }
 
     .totalPointsSpaceR {
+        width: 54px;
         margin-right: 0.25em;
         text-align: right;
     }
@@ -510,18 +532,32 @@
         color: #fff;
         margin: 0 10px;
     }
+
+    .weekPlayerLabel {
+        text-align: center;
+        text-decoration: underline;
+    }
+
+    .playerHeading {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 14px;
+        border-bottom: 1px solid #bbb;
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 0 !important;
+    }
 </style>
 
 <div class="matchup">
-    <div class="header" on:click={() => expandClose()} bind:this={el} >
+    <div class={clsx(active !== ix && 'header', active == ix && 'header-expanded')} on:click={() => expandClose()} bind:this={el} >
         <div class={clsx('opponent', 'homeGlow', team.isEliminated && 'awayGlow')}>
             <img class="avatar" src={team.manager.avatar} alt="home team avatar" />
             <div class="name">{team.manager.name}</div>
-            <div class="totalPoints totalPointsSpaceR">{round(homePointsA)}<div class="totalProjection">{round(homeProjectionTotal)}</div></div>
+            <div class="totalPoints totalPointsSpaceR">{round(homePointsA)}<div class="totalProjection">{round(projectionATotal)}</div></div>
             <span class="arithmetic-signs">+</span>
-            <div class="totalPoints totalPointsSpaceR">{round(homePointsB)}<div class="totalProjection">{round(homeProjectionTotal)}</div></div>
+            <div class="totalPoints totalPointsSpaceR">{round(homePointsB)}<div class="totalProjection">{round(projectionBTotal)}</div></div>
             <span class="arithmetic-signs">=</span>
-            <div class="totalPoints totalPointsR">{round(homePointsTotal)}<div class="totalProjection">{round(homeProjectionTotal)}</div></div>
+            <div class="totalPoints totalPointsR">{round(homePointsTotal)}<div class="totalProjection">{round(projectionATotal + projectionBTotal)}</div></div>
         </div>
 <!--        <img class="divider" src="/{winning}Divider.jpg" alt="divider" />-->
 <!--        <div class="opponent away{winning == "away" ? " awayGlow" : ""}">-->
@@ -532,6 +568,16 @@
     </div>
 
     <div class="rosters" style="max-height: {active == ix ? calcHeight() + "px" : "0"}; {active != ix ? "border: none" : ""};">
+        <div class="playerHeading">
+            <span class="weekPlayerLabel">
+                Week {weekA} Players
+            </span>
+            <span class="weekPlayerLabel">
+                Week {weekB} Players
+            </span>
+        </div>
+
+
         {#each starters as player}
             <div class="line">
                 <div class="player playerHome">
@@ -562,31 +608,31 @@
 
                 <div class="dividerLine" />
 
-<!--                <div class="player playerAway">-->
-<!--                    <span class="iconAndTeam iconAndTeamAway">-->
-<!--                        {#if player.away.avatar}-->
-<!--                            <div class="playerAvatar playerInfo" style="{player.away.avatar}">-->
-<!--                                {#if player.away.team && player.away.pos != "DEF"}-->
-<!--                                    <img src="https://sleepercdn.com/images/team_logos/nfl/{player.away.team.toLowerCase()}.png" class="teamLogo teamAwayLogo" alt="team logo"/>-->
-<!--                                {/if}-->
-<!--                            </div>-->
-<!--                        {/if}-->
-<!--                        {#if player.away.pos}-->
-<!--                            <span class="pos {player.away.pos}">{player.away.pos}</span>-->
-<!--                        {/if}-->
-<!--                    </span>-->
-<!--                    <div class="nameHolder nameHolderR{player.away.name == 'Empty'? ' playerEmpty' : ''}">-->
-<!--                        {#if player.away.team}-->
-<!--                            {#if player.away.opponent}-->
-<!--                                <div class="playerTeam">{player.away.opponent} vs{player.away.pos != "DEF" ? ` ${player.away.team}` : ""}</div>-->
-<!--                            {:else}-->
-<!--                                <div class="playerTeam">{player.away.pos != "DEF" ? player.away.team : ""}</div>-->
-<!--                            {/if}-->
-<!--                        {/if}-->
-<!--                        <span class="playerInfo playerName playerNameAway">{player.away.name}</span>-->
-<!--                    </div>-->
-<!--                    <span class="points pointsL">{round(player.away.points)}<div class="totalProjection">{round(player.away.projection)}</div></span>-->
-<!--                </div>-->
+                <div class="player playerAway">
+                    <span class="iconAndTeam iconAndTeamAway">
+                        {#if player.away.avatar}
+                            <div class="playerAvatar playerInfo" style="{player.away.avatar}">
+                                {#if player.away.team && player.away.pos != "DEF"}
+                                    <img src="https://sleepercdn.com/images/team_logos/nfl/{player.away.team.toLowerCase()}.png" class="teamLogo teamAwayLogo" alt="team logo"/>
+                                {/if}
+                            </div>
+                        {/if}
+                        {#if player.away.pos}
+                            <span class="pos {player.away.pos}">{player.away.pos}</span>
+                        {/if}
+                    </span>
+                    <div class="nameHolder nameHolderR{player.away.name == 'Empty'? ' playerEmpty' : ''}">
+                        {#if player.away.team}
+                            {#if player.away.opponent}
+                                <div class="playerTeam">{player.away.opponent} vs{player.away.pos != "DEF" ? ` ${player.away.team}` : ""}</div>
+                            {:else}
+                                <div class="playerTeam">{player.away.pos != "DEF" ? player.away.team : ""}</div>
+                            {/if}
+                        {/if}
+                        <span class="playerInfo playerName playerNameAway">{player.away.name}</span>
+                    </div>
+                    <span class="points pointsL">{round(player.away.points)}<div class="totalProjection">{round(player.away.projection)}</div></span>
+                </div>
             </div>
         {/each}
         {#if !expandOverride}
