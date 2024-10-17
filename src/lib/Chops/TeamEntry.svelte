@@ -548,34 +548,36 @@
     }
 </style>
 
-<div class="matchup">
-    <div class={clsx(active !== ix && 'header', active == ix && 'header-expanded')} on:click={() => expandClose()} bind:this={el} >
-        <div class={clsx('opponent', 'homeGlow', team.isEliminated && 'awayGlow')}>
-            <img class="avatar" src={team.manager.avatar} alt="home team avatar" />
-            <div class="name">{team.manager.name}</div>
-            <div class="totalPoints totalPointsSpaceR">{round(homePointsA)}<div class="totalProjection">{round(projectionATotal)}</div></div>
-            <span class="arithmetic-signs">+</span>
-            <div class="totalPoints totalPointsSpaceR">{round(homePointsB)}<div class="totalProjection">{round(projectionBTotal)}</div></div>
-            <span class="arithmetic-signs">=</span>
-            <div class="totalPoints totalPointsR">{round(homePointsTotal)}<div class="totalProjection">{round(projectionATotal + projectionBTotal)}</div></div>
+{#if team.manager.name === 'Unknown Team'}
+    {:else}
+    <div class="matchup">
+        <div class={clsx(active !== ix && 'header', active == ix && 'header-expanded')} on:click={() => expandClose()} bind:this={el} >
+            <div class={clsx('opponent', 'homeGlow', team.isEliminated && 'awayGlow')}>
+                <img class="avatar" src={team.manager.avatar} alt="home team avatar" />
+                <div class="name">{team.manager.name}</div>
+                <div class="totalPoints totalPointsSpaceR">{round(homePointsA)}<div class="totalProjection">{round(projectionATotal)}</div></div>
+                <span class="arithmetic-signs">+</span>
+                <div class="totalPoints totalPointsSpaceR">{round(homePointsB)}<div class="totalProjection">{round(projectionBTotal)}</div></div>
+                <span class="arithmetic-signs">=</span>
+                <div class="totalPoints totalPointsR">{round(homePointsTotal)}<div class="totalProjection">{round(projectionATotal + projectionBTotal)}</div></div>
+            </div>
+            <!--        <img class="divider" src="/{winning}Divider.jpg" alt="divider" />-->
+            <!--        <div class="opponent away{winning == "away" ? " awayGlow" : ""}">-->
+            <!--            <div class="totalPoints totalPointsL">{round(awayPointsTotal)}<div class="totalProjection">{round(awayProjectionTotal)}</div></div>-->
+            <!--            <div class="name" >{away.manager.name}</div>-->
+            <!--            <img class="avatar" src={away.manager.avatar} alt="away team avatar" />-->
+            <!--        </div>-->
         </div>
-<!--        <img class="divider" src="/{winning}Divider.jpg" alt="divider" />-->
-<!--        <div class="opponent away{winning == "away" ? " awayGlow" : ""}">-->
-<!--            <div class="totalPoints totalPointsL">{round(awayPointsTotal)}<div class="totalProjection">{round(awayProjectionTotal)}</div></div>-->
-<!--            <div class="name" >{away.manager.name}</div>-->
-<!--            <img class="avatar" src={away.manager.avatar} alt="away team avatar" />-->
-<!--        </div>-->
-    </div>
 
-    <div class="rosters" style="max-height: {active == ix ? calcHeight() + "px" : "0"}; {active != ix ? "border: none" : ""};">
+        <div class="rosters" style="max-height: {active == ix ? calcHeight() + "px" : "0"}; {active != ix ? "border: none" : ""};">
         <div class="playerHeading">
             <span class="weekPlayerLabel">
                 Week {weekA} Players
             </span>
-            <span class="weekPlayerLabel">
+        <span class="weekPlayerLabel">
                 Week {weekB} Players
             </span>
-        </div>
+    </div>
 
 
         {#each starters as player}
@@ -639,4 +641,6 @@
             <div class="close" on:click={() => expandClose()}>Close Matchup</div>
         {/if}
     </div>
-</div>
+    </div>
+{/if}
+
