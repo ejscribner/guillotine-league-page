@@ -73,7 +73,7 @@
 {:else}
     {#if matchupWeeks.length}
         <!--TODO: double check week logic-->
-        <ChopPeriods {players} {queryWeek} {chopPeriods} {matchupWeeks} {regularSeasonLength} {year} week={Math.round(week/2)} bind:selection={selection} {leagueTeamManagers} />
+        <ChopPeriods {players} {queryWeek} {chopPeriods} {matchupWeeks} {regularSeasonLength} {year} week={Math.ceil((week - 1) / 2)} bind:selection={selection} {leagueTeamManagers} />
     {:else}
         <div class="message">
             <p>No upcoming chops...</p>
