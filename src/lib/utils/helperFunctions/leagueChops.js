@@ -80,7 +80,6 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
   // });
   // todo: this sorts by week though? we need to do two week pairs. Should we sort after the chopPeriods instead?
 
-
   const chopPeriods = [];
   // process all the matchups
   let periodCounter = 1;
@@ -111,7 +110,6 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
   };
 
   matchupsStore.update(() => matchupsResponse);
-
 
   return matchupsResponse;
 };

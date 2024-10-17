@@ -19,7 +19,6 @@
     weekA,
     weekB;
 
-
   // let home = matchup[0];
   // let away = matchup[1];
 

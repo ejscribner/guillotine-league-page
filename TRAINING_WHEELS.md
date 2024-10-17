@@ -31,10 +31,7 @@ Generate a custom league page for your Sleeper fantasy football league in just a
 ### 2. Configure your League
 
 - In your league page, go to `/src/lib/utils/leagueInfo.js`
-  > ![src](https://storage.googleapis.com/nfl-player-data/src.png)
-  > ![lib](https://storage.googleapis.com/nfl-player-data/lib.png)
-  > ![utils](https://storage.googleapis.com/nfl-player-data/utils.png)
-  > ![leagueInfo](https://storage.googleapis.com/nfl-player-data/leagueInfo.png)
+  > ![src](https://storage.googleapis.com/nfl-player-data/src.png) > ![lib](https://storage.googleapis.com/nfl-player-data/lib.png) > ![utils](https://storage.googleapis.com/nfl-player-data/utils.png) > ![leagueInfo](https://storage.googleapis.com/nfl-player-data/leagueInfo.png)
 
 <br />
 
@@ -136,17 +133,19 @@ Generate a custom league page for your Sleeper fantasy football league in just a
   - `"photo" :` This manager's photo. To upload a photo:
 
     - Open up your repo's root in a new tab
+
       > ![newTab](https://storage.googleapis.com/nfl-player-data/newTab.png)
 
       <br />
 
     - Got to `/static/managers/`
-      > ![static](https://storage.googleapis.com/nfl-player-data/static.png)
-      > ![managersDir](https://storage.googleapis.com/nfl-player-data/managersDir.png)
+
+      > ![static](https://storage.googleapis.com/nfl-player-data/static.png) > ![managersDir](https://storage.googleapis.com/nfl-player-data/managersDir.png)
 
       <br />
 
     - Click on `Add file` then `Upload files`
+
       > ![managersDir](https://storage.googleapis.com/nfl-player-data/upload.png)
 
       <br />
@@ -171,8 +170,7 @@ Generate a custom league page for your Sleeper fantasy football league in just a
     - Go to [https://api.sleeper.app/v1/players/nfl](https://api.sleeper.app/v1/players/nfl) in a new tab
     - Use `⌘ Command` + `F` (on Mac), or `Ctrl` + `F` on Windows to search for the player you are looking for and then copy down that player's `player_id`
 
-      > ![player selection](https://storage.googleapis.com/nfl-player-data/playerSelection.jpg)
-      > <br />
+      > ![player selection](https://storage.googleapis.com/nfl-player-data/playerSelection.jpg) > <br />
 
     - Supply that number (i.e. `1426`)
 
