@@ -14,6 +14,8 @@ export const getLeagueRosters = async (queryLeagueID = leagueID) => {
 	}
     const res = await fetch(`https://api.sleeper.app/v1/league/${queryLeagueID}/rosters`, {compress: true}).catch((err) => { console.error(err); });
 	const data = await res.json().catch((err) => { console.error(err); });
+
+	console.log(res)
 	
 	if (res.ok) {
 		const processedRosters = processRosters(data);
@@ -25,6 +27,7 @@ export const getLeagueRosters = async (queryLeagueID = leagueID) => {
 }
 
 const processRosters = (rosters) => {
+	console.log(rosters)
 	const startersAndReserve = [];
     const rosterMap = {};
 	for(const roster of rosters) {

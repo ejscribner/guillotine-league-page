@@ -8,6 +8,8 @@ export async function load({fetch}) {
         loadPlayers(fetch),
     )
 
+    // todo: getleaguerosters returns some empty players and leaves more on the bench
+
     return {
         rostersInfo
     };

@@ -4,8 +4,118 @@ import { getNflState } from "./nflState"
 import { waitForAll } from './multiPromise';
 import { get } from 'svelte/store';
 import {matchupsStore} from '$lib/stores';
+import {getStarterPositions} from '$lib/utils/helperFunctions/predictOptimalScore.js';
 
-export const getLeagueMatchups = async () => {
+export const setBestBallLineups = (matchupsData, playersMap, starterPositions, weekNumber) => {
+	// players[string-id], players_points{id: pts} starters[string-id], starter_points[scores]
+	// starter data sometimes not there, so check for null
+	/*
+	- array of nfl weeks
+	- each week has an array of teams
+	- ech team has an array of {players[string-id], players_points{id: pts} starters[string-id], starter_points[scores]}
+	 */
+	// console.log(matchupsData)
+	// map all players by id to their profile {fn: string, ln: string, pos: string, t: string-team, wi: {p: string(proj), o: string(opponent)}[]}
+	// console.log(playersMap)
+
+	console.log(starterPositions)
+	let localMatchupsData = structuredClone(matchupsData);
+
+	// for (const week of matchupsData) {
+	for (let weekIdx = 0; weekIdx < matchupsData.length; weekIdx++) {
+		const week = matchupsData[weekIdx];
+		console.log(weekIdx + 1)
+		console.log(weekNumber)
+		// for (const team of week) {
+		for (let teamIdx = 0; teamIdx < week.length; teamIdx++) {
+			let totalProjectedPoints = 0;
+			const team = week[teamIdx];
+			console.log('YO')
+			console.log(team)
+			// todo: team.starters no longer null anywhere?
+			// try instead comparing current week with index
+			// todo: check >=
+			if ((!team.starters || weekIdx + 1 >= weekNumber) && team.players && team.players_points) {
+				let newStarters = new Array(starterPositions.length).fill(0);
+				// positionsTracker looks like this at start ['QB', 'RB', 'RB', 'WR', 'WR', 'TE', 'FLEX', 'FLEX']
+				let positionsTracker = Array.from(starterPositions);
+				const teamPlayers = team.players.map((playerId) => {
+					if (playersMap.players[playerId].wi) {
+						return {
+							player: playersMap.players[playerId],
+							playerId,
+							projectedPoints: Number(playersMap.players[playerId].wi[weekIdx + 1].p)
+						}
+						// console.log(playersMap.players[playerId])
+						// console.log(playersMap.players[playerId].wi[i + 1])
+					}
+
+				}).sort((a, b) => b.projectedPoints - a.projectedPoints); // sort by points descending
+
+				// console.log(teamPlayers)
+				teamPlayers.forEach((player) => {
+					if (player) {
+						const playerPositionIdx = positionsTracker.indexOf(player.player.pos);
+
+						if (playerPositionIdx !== -1 && newStarters[playerPositionIdx] === 0) {
+							// Fill in the core position (QB, RB, WR, TE)
+							newStarters[playerPositionIdx] = player.playerId;
+							positionsTracker[playerPositionIdx] = null; // Mark the position as filled
+							totalProjectedPoints += player.projectedPoints;
+						} else if (['RB', 'WR', 'TE'].includes(player.player.pos)) {
+							// If core position is filled, try to fill a FLEX spot
+							const flexPositionIdx = positionsTracker.indexOf('FLEX');
+							if (flexPositionIdx !== -1 && newStarters[flexPositionIdx] === 0) {
+								// Fill in the FLEX position
+								newStarters[flexPositionIdx] = player.playerId;
+								positionsTracker[flexPositionIdx] = null; // Mark the FLEX spot as filled
+								totalProjectedPoints += player.projectedPoints;
+							}
+						}
+					}
+
+				})
+				// console.log(newStarters)
+
+				localMatchupsData[weekIdx][teamIdx].starters = newStarters;
+				localMatchupsData[weekIdx][teamIdx].starters_points = new Array(newStarters.length).fill(0);
+				localMatchupsData[weekIdx][teamIdx].projected_points = totalProjectedPoints;
+
+			} else if (team.starters && team.players && team.players_points) { // todo: better logic here
+				// HANDLE THE CASE WHERE THE STARTERS ARE ALREADY SET, not use proj
+				let newStarters = team.starters;
+				const teamPlayers = team.players.map((playerId) => {
+					return {
+						player: playersMap.players[playerId],
+						points: team.players_points[playerId]
+					}
+					// console.log(playersMap.players[playerId])
+					// console.log(team.players_points[playerId])
+				}).sort((a, b) => b.points - a.points); // sort by points descending
+
+				// console.log(teamPlayers)
+				teamPlayers.forEach((player) => {
+					// console.log(player.points)
+					// console.log(player.player.pos)
+					// console.log(newStarters[starterPositions.indexOf(player.player.pos)])
+					if (newStarters[starterPositions.indexOf(player.player.pos)] === 0) {
+						// console.log('start')
+						// todo: check this once we have some data for the week
+						// todo: handle starter_pointsf
+						newStarters[starterPositions.indexOf(player.player.pos)] = player.player.id;
+					}
+				})
+			}
+		}
+		// console.log('---')
+	}
+
+	return localMatchupsData;
+
+}
+
+
+export const getLeagueMatchups = async (playersData) => {
 	if(get(matchupsStore).matchupWeeks) {
 		return get(matchupsStore);
 	}
@@ -42,10 +152,19 @@ export const getLeagueMatchups = async () => {
 	}
 	const matchupsData = await waitForAll(...matchupsJsonPromises).catch((err) => { console.error(err); }).catch((err) => { console.error(err); });
 
+	const playersMap = await playersData;
+
+	const newMatchupsData = setBestBallLineups(matchupsData, playersMap, await getStarterPositions(leagueData), week);
+	// console.log('ABCDEFG')
+	// console.log(matchupsData)
+	// console.log(newMatchupsData)
+	// console.log('HIJKLMNOP')
+
+
 	const matchupWeeks = [];
 	// process all the matchups
-	for(let i = 1; i < matchupsData.length + 1; i++) {
-		const processed = processMatchups(matchupsData[i - 1], i);
+	for(let i = 1; i < newMatchupsData.length + 1; i++) {
+		const processed = processMatchups(newMatchupsData[i - 1], i);
 		if(processed) {
 			matchupWeeks.push({
 				matchups: processed.matchups,

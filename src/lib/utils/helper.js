@@ -17,6 +17,7 @@ import { predictScores } from './helperFunctions/predictOptimalScore';
 import { getBrackets } from './helperFunctions/leagueBrackets';
 import { getBlogPosts, generateParagraph } from './helperFunctions/getBlogPosts';
 import { getLeagueStandings } from './helperFunctions/leagueStandings';
+import { getLeagueChops} from './helperFunctions/leagueChops.js';
 
 export {
     enableBlog,
@@ -29,6 +30,7 @@ export {
     getLeagueRosters,
     getLeagueTeamManagers,
     getLeagueMatchups,
+    getLeagueChops,
     getRivalryMatchups,
     getNews,
     loadPlayers,

@@ -247,7 +247,18 @@ export const getTeamFromTeamManagers = (teamManagers, rosterID, year) => {
     if(!year || year > teamManagers.currentSeason) {
         year = teamManagers.currentSeason;
     }
+
+    // console.log(teamManagers.teamManagersMap)
     return teamManagers.teamManagersMap[year][rosterID]['team'];
+}
+
+export const isTeamEliminated = (teamManagers, rosterID, year) => {
+    if(!year || year > teamManagers.currentSeason) {
+        year = teamManagers.currentSeason;
+    }
+
+    // console.log(teamManagers.teamManagersMap)
+    return teamManagers.teamManagersMap[year][rosterID]['isEliminated'];
 }
 
 export const getNestedTeamNamesFromTeamManagers = (teamManagers, year, rosterID) => {

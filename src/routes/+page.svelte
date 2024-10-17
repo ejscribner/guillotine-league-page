@@ -3,6 +3,9 @@
 	import { getNflState, leagueName, getAwards, getLeagueTeamManagers, homepageText, managers, gotoManager, enableBlog, waitForAll } from '$lib/utils/helper';
 	import { Transactions, PowerRankings, HomePost} from '$lib/components';
 	import { getAvatarFromTeamManagers, getTeamFromTeamManagers } from '$lib/utils/helperFunctions/universalFunctions';
+  import Button from '@smui/button';
+  import {Icon} from '@smui/tab';
+  import {goto} from '$app/navigation';
 
     const nflState = getNflState();
     const podiumsData = getAwards();
@@ -134,6 +137,13 @@
 		color: #bbb;
 		font-style: italic;
 	}
+
+  .seeChops {
+    display: flex;
+    justify-content: center;
+    margin: 40px 0;
+  }
+  
 </style>
 
 <div id="home">
@@ -146,8 +156,14 @@
             {#if enableBlog}
                 <HomePost />
             {/if}
+
+            <div class="seeChops">
+                <Button on:click={() => goto('/chops')} raised>See Chops<Icon class="material-icons">chevron_right</Icon></Button>
+            </div>
         </div>
-        <PowerRankings />
+
+
+<!--        <PowerRankings />-->
     </div>
     
     <div class="leagueData">

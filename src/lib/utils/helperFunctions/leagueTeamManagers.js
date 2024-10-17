@@ -40,10 +40,14 @@ export const getLeagueTeamManagers = async () => {
             if(finalUsers[processedUserKey]) continue;
             finalUsers[processedUserKey] = processedUsers[processedUserKey];
         }
+
+    console.log(rosters)
+        
         for(const roster of rosters) {
             teamManagersMap[year][roster.roster_id] = {
                 team: getTeamData(processedUsers, roster.owner_id),
                 managers: getManagers(roster, processedUsers),
+                isEliminated: !!roster.settings.locked || !roster.owner_id,
             };
         }
     }
