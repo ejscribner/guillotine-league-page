@@ -1,30 +1,34 @@
 <script>
-	import { loadPlayers } from '$lib/utils/helper';
-	import RosterSorter from './RosterSorter.svelte'
+  import { loadPlayers } from "$lib/utils/helper";
+  import RosterSorter from "./RosterSorter.svelte";
 
-	export let leagueData, rosterData, leagueTeamManagers, playersInfo;
+  export let leagueData, rosterData, leagueTeamManagers, playersInfo;
 
-	let players = playersInfo.players;
+  let players = playersInfo.players;
 
-	const refreshPlayers = async () => {
-		const newPlayersInfo = await loadPlayers(null, true);
-		players = newPlayersInfo.players;
-	}
+  const refreshPlayers = async () => {
+    const newPlayersInfo = await loadPlayers(null, true);
+    players = newPlayersInfo.players;
+  };
 
-	if(playersInfo.stale) {
-		refreshPlayers();
-	}
-
-  console.log(rosterData.rosters)
+  if (playersInfo.stale) {
+    refreshPlayers();
+  }
 </script>
 
-<style>
-	.rosters {
-		position: relative;
-		z-index: 1;
-	}
-</style>
-
 <div class="rosters">
-	<RosterSorter rosters={rosterData.rosters} {players} {leagueTeamManagers} startersAndReserve={rosterData.startersAndReserve} {leagueData} />
+  <RosterSorter
+    rosters={rosterData.rosters}
+    {players}
+    {leagueTeamManagers}
+    startersAndReserve={rosterData.startersAndReserve}
+    {leagueData}
+  />
 </div>
+
+<style>
+  .rosters {
+    position: relative;
+    z-index: 1;
+  }
+</style>

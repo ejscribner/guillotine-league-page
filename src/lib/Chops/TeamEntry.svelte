@@ -1,642 +1,750 @@
 <script>
-    import {round} from '$lib/utils/helper'
-    import {getTeamFromTeamManagers, isTeamEliminated} from '$lib/utils/helperFunctions/universalFunctions';
-    import clsx from 'clsx';
-    import {Icon} from '@smui/tab';
+  import { round } from "$lib/utils/helper";
+  import {
+    getTeamFromTeamManagers,
+    isTeamEliminated,
+  } from "$lib/utils/helperFunctions/universalFunctions";
+  import clsx from "clsx";
+  import { Icon } from "@smui/tab";
 
-    export let team, players, active, ix, displayWeek, expandOverride=false, matchupWeek, leagueTeamManagers, year, weekA, weekB;
+  export let team,
+    players,
+    active,
+    ix,
+    displayWeek,
+    expandOverride = false,
+    matchupWeek,
+    leagueTeamManagers,
+    year,
+    weekA,
+    weekB;
 
-    console.log(team) // team == matchup[0] essentially
+  // let home = matchup[0];
+  // let away = matchup[1];
 
-    // let home = matchup[0];
-    // let away = matchup[1];
+  let homePointsA = team.pointsA.reduce((a, b) => a + b, 0);
+  let homePointsB = team.pointsB.reduce((a, b) => a + b, 0);
+  let homePointsTotal = homePointsA + homePointsB;
 
-    let homePointsA = team.pointsA.reduce((a, b) => a + b, 0);
-    let homePointsB = team.pointsB.reduce((a, b) => a + b, 0);
-    let homePointsTotal = homePointsA + homePointsB;
+  let projectionATotal = 0;
+  let projectionBTotal = 0;
+  let awayPointsTotal = 0;
+  let awayProjectionTotal = 0;
 
-    // console.log(team)
-    
-    let projectionATotal = 0;
-    let projectionBTotal = 0;
-    let awayPointsTotal = 0;
-    let awayProjectionTotal = 0;
+  let winning = "home";
 
-    let winning = "home";
-
-    const digestStarters = (x, p) => {
+  const digestStarters = (x, p) => {
     //     home = matchup[0];
     //     away = matchup[1];
-        team.manager = getTeamFromTeamManagers(leagueTeamManagers, team.roster_id, year);
-        team.isEliminated = isTeamEliminated(leagueTeamManagers, team.roster_id, year)
+    team.manager = getTeamFromTeamManagers(
+      leagueTeamManagers,
+      team.roster_id,
+      year
+    );
+    team.isEliminated = isTeamEliminated(
+      leagueTeamManagers,
+      team.roster_id,
+      year
+    );
 
-        // away.manager = getTeamFromTeamManagers(leagueTeamManagers, away.roster_id, year);
-        const startersA = matchupWeek ? team.startersA[matchupWeek] : team.startersA ?? [];
-        const startersB = matchupWeek ? team.startersB[matchupWeek] : team.startersB ?? [];
-        // console.log(team)
-        if (startersA.length === 0) {
-            team.starters = [];
-        }
-        // const awayStarters = matchupWeek ? away.starters[matchupWeek] : away.starters;
-        const pointsA = matchupWeek ? team.pointsA[matchupWeek] : team.pointsA;
-        const pointsB = matchupWeek ? team.pointsB[matchupWeek] : team.pointsB;
-        // const awayPoints = matchupWeek ? away.points[matchupWeek] : away.points;
+    // away.manager = getTeamFromTeamManagers(leagueTeamManagers, away.roster_id, year);
+    const startersA = matchupWeek
+      ? team.startersA[matchupWeek]
+      : team.startersA ?? [];
+    const startersB = matchupWeek
+      ? team.startersB[matchupWeek]
+      : team.startersB ?? [];
+    if (startersA.length === 0) {
+      team.starters = [];
+    }
+    // const awayStarters = matchupWeek ? away.starters[matchupWeek] : away.starters;
+    const pointsA = matchupWeek ? team.pointsA[matchupWeek] : team.pointsA;
+    const pointsB = matchupWeek ? team.pointsB[matchupWeek] : team.pointsB;
+    // const awayPoints = matchupWeek ? away.points[matchupWeek] : away.points;
     //
     //     homePointsTotal = 0;
-        projectionATotal = 0;
-        projectionBTotal = 0;
-        awayPointsTotal = 0;
-        awayProjectionTotal = 0;
+    projectionATotal = 0;
+    projectionBTotal = 0;
+    awayPointsTotal = 0;
+    awayProjectionTotal = 0;
     //
-        const localStarters = [];
-        for(let i = 0; i < startersA.length; i++) {
-            // homePointsTotal += pointsA[i];
-            // const awayPoint = awayPoints ? awayPoints[i] : 0;
-            // awayPointsTotal += awayPoint;
-            const home = digestStarter(startersA[i], pointsA[i], weekA);
-            const away = digestStarter(startersB[i], pointsB[i], weekB);
-            // console.log(team.manager)
-            // console.log(home)
-            // console.log(away)
-            // const awayStarter = awayStarters ? awayStarters[i] : null;
-            // const away = digestStarter(awayStarter, awayPoint);
-            projectionATotal += home.projection;
-            projectionBTotal += away.projection;
-            // awayProjectionTotal += away ? away.projection : 0;
-            localStarters.push({home, away});
-        }
-        // if(awayPointsTotal < homePointsTotal) winning = "home";
-        // if(awayPointsTotal > homePointsTotal) winning = "away";
-        // if(awayPointsTotal == homePointsTotal) winning = "tied";
-        starters = localStarters;
+    const localStarters = [];
+    for (let i = 0; i < startersA.length; i++) {
+      // homePointsTotal += pointsA[i];
+      // const awayPoint = awayPoints ? awayPoints[i] : 0;
+      // awayPointsTotal += awayPoint;
+      const home = digestStarter(startersA[i], pointsA[i], weekA);
+      const away = digestStarter(startersB[i], pointsB[i], weekB);
+      // const awayStarter = awayStarters ? awayStarters[i] : null;
+      // const away = digestStarter(awayStarter, awayPoint);
+      projectionATotal += home.projection;
+      projectionBTotal += away.projection;
+      // awayProjectionTotal += away ? away.projection : 0;
+      localStarters.push({ home, away });
     }
+    // if(awayPointsTotal < homePointsTotal) winning = "home";
+    // if(awayPointsTotal > homePointsTotal) winning = "away";
+    // if(awayPointsTotal == homePointsTotal) winning = "tied";
+    starters = localStarters;
+  };
 
-    const digestStarter = (starter, points, week) => {
-        if(!starter || starter == 0) {
-                return {
-                    name: "Empty",
-                    avatar: null,
-                    poss: null,
-                    team: null,
-                    opponent: null,
-                    projection: 0,
-                    points: 0,
-                };
-            }
-            const player = players[starter];
-            let name = player.pos == "DEF" ? player.ln : `${player.fn[0]}. ${player.ln}`;
-            let projection = 0;
-            if(player.wi && player.wi[week]) {
-                // console.log(player)
-                // console.log(week)
-                projection = parseFloat(player.wi[week].p);
-            }
-            return {
-                name,
-                avatar: player.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`,
-                pos: player.pos,
-                team: player.t,
-                opponent: player.wi && player.wi[week] ? player.wi[week].o : null,
-                projection,
-                points,
-            };
+  const digestStarter = (starter, points, week) => {
+    if (!starter || starter == 0) {
+      return {
+        name: "Empty",
+        avatar: null,
+        poss: null,
+        team: null,
+        opponent: null,
+        projection: 0,
+        points: 0,
+      };
     }
-
-    let starters;
-    
-    $: digestStarters(ix, players, matchupWeek);
-
-    let el;
-
-    $: top = el?.getBoundingClientRect() ? el?.getBoundingClientRect().top  : 0;
-
-    const expandClose = () => {
-        if(expandOverride) return;
-        active = active == ix ? null : ix;
-        setTimeout( () => {
-            window.scrollTo({left: 0, top, behavior: 'smooth'});
-        }, 200);
-        ;
+    const player = players[starter];
+    let name =
+      player.pos == "DEF" ? player.ln : `${player.fn[0]}. ${player.ln}`;
+    let projection = 0;
+    if (player.wi && player.wi[week]) {
+      projection = parseFloat(player.wi[week].p);
     }
+    return {
+      name,
+      avatar:
+        player.pos == "DEF"
+          ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png)`
+          : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`,
+      pos: player.pos,
+      team: player.t,
+      opponent: player.wi && player.wi[week] ? player.wi[week].o : null,
+      projection,
+      points,
+    };
+  };
 
-    let innerWidth;
+  let starters;
 
-    const calcHeight = () => {
-        let multiplier = 73;
-        if(innerWidth < 500) {
-            multiplier = 72;
-        }
-        if(innerWidth < 410) {
-            multiplier = 71;
-        }
-        const startersLength = matchupWeek ? team.startersA[matchupWeek].length : team.startersA.length;
-        return startersLength * multiplier + 37 + 35;
-        // 37 is height of the close button, 35 is the height of the header
+  $: digestStarters(ix, players, matchupWeek);
+
+  let el;
+
+  $: top = el?.getBoundingClientRect() ? el?.getBoundingClientRect().top : 0;
+
+  const expandClose = () => {
+    if (expandOverride) return;
+    active = active == ix ? null : ix;
+    setTimeout(() => {
+      window.scrollTo({ left: 0, top, behavior: "smooth" });
+    }, 200);
+  };
+
+  let innerWidth;
+
+  const calcHeight = () => {
+    let multiplier = 73;
+    if (innerWidth < 500) {
+      multiplier = 72;
     }
-
+    if (innerWidth < 410) {
+      multiplier = 71;
+    }
+    const startersLength = matchupWeek
+      ? team.startersA[matchupWeek].length
+      : team.startersA.length;
+    return startersLength * multiplier + 37 + 35;
+    // 37 is height of the close button, 35 is the height of the header
+  };
 </script>
 
-<svelte:window bind:innerWidth={innerWidth} />
+<svelte:window bind:innerWidth />
+
+{#if team.manager.name === "Unknown Team"}{:else}
+  <div class="matchup">
+    <div
+      class={clsx(active !== ix && "header", active == ix && "header-expanded")}
+      on:click={() => expandClose()}
+      bind:this={el}
+    >
+      <div
+        class={clsx("opponent", "homeGlow", team.isEliminated && "awayGlow")}
+      >
+        <img class="avatar" src={team.manager.avatar} alt="home team avatar" />
+        <div class="name">{team.manager.name}</div>
+        <div class="totalPoints totalPointsSpaceR">
+          {round(homePointsA)}
+          <div class="totalProjection">{round(projectionATotal)}</div>
+        </div>
+        <span class="arithmetic-signs">+</span>
+        <div class="totalPoints totalPointsSpaceR">
+          {round(homePointsB)}
+          <div class="totalProjection">{round(projectionBTotal)}</div>
+        </div>
+        <span class="arithmetic-signs">=</span>
+        <div class="totalPoints totalPointsR">
+          {round(homePointsTotal)}
+          <div class="totalProjection">
+            {round(projectionATotal + projectionBTotal)}
+          </div>
+        </div>
+      </div>
+      <!--        <img class="divider" src="/{winning}Divider.jpg" alt="divider" />-->
+      <!--        <div class="opponent away{winning == "away" ? " awayGlow" : ""}">-->
+      <!--            <div class="totalPoints totalPointsL">{round(awayPointsTotal)}<div class="totalProjection">{round(awayProjectionTotal)}</div></div>-->
+      <!--            <div class="name" >{away.manager.name}</div>-->
+      <!--            <img class="avatar" src={away.manager.avatar} alt="away team avatar" />-->
+      <!--        </div>-->
+    </div>
+
+    <div
+      class="rosters"
+      style="max-height: {active == ix ? calcHeight() + 'px' : '0'}; {active !=
+      ix
+        ? 'border: none'
+        : ''};"
+    >
+      <div class="playerHeading">
+        <span class="weekPlayerLabel">
+          Week {weekA} Players
+        </span>
+        <span class="weekPlayerLabel">
+          Week {weekB} Players
+        </span>
+      </div>
+
+      {#each starters as player}
+        <div class="line">
+          <div class="player playerHome">
+            <span class="iconAndTeam iconAndTeamHome">
+              {#if player.home.pos}
+                <span class="pos {player.home.pos}">{player.home.pos}</span>
+              {/if}
+              {#if player.home.avatar}
+                <div class="playerAvatar playerInfo" style={player.home.avatar}>
+                  {#if player.home.team && player.home.pos != "DEF"}
+                    <img
+                      src="https://sleepercdn.com/images/team_logos/nfl/{player.home.team.toLowerCase()}.png"
+                      class="teamLogo teamHomeLogo"
+                      alt="team logo"
+                    />
+                  {/if}
+                </div>
+              {/if}
+            </span>
+            <div
+              class="nameHolder nameHolderL{player.home.name == 'Empty'
+                ? ' playerEmpty'
+                : ''}"
+            >
+              <span class="playerInfo playerName playerNameHome"
+                >{player.home.name}</span
+              >
+              {#if player.home.team}
+                {#if player.home.opponent}
+                  <div class="playerTeam">
+                    {player.home.pos != "DEF" ? `${player.home.team} ` : ""}vs {player
+                      .home.opponent}
+                  </div>
+                {:else}
+                  <div class="playerTeam">
+                    {player.home.pos != "DEF" ? player.home.team : ""}
+                  </div>
+                {/if}
+              {/if}
+            </div>
+            <span class="points pointsR"
+              >{round(player.home.points)}
+              <div class="totalProjection">
+                {round(player.home.projection)}
+              </div></span
+            >
+          </div>
+
+          <div class="dividerLine" />
+
+          <div class="player playerAway">
+            <span class="iconAndTeam iconAndTeamAway">
+              {#if player.away.avatar}
+                <div class="playerAvatar playerInfo" style={player.away.avatar}>
+                  {#if player.away.team && player.away.pos != "DEF"}
+                    <img
+                      src="https://sleepercdn.com/images/team_logos/nfl/{player.away.team.toLowerCase()}.png"
+                      class="teamLogo teamAwayLogo"
+                      alt="team logo"
+                    />
+                  {/if}
+                </div>
+              {/if}
+              {#if player.away.pos}
+                <span class="pos {player.away.pos}">{player.away.pos}</span>
+              {/if}
+            </span>
+            <div
+              class="nameHolder nameHolderR{player.away.name == 'Empty'
+                ? ' playerEmpty'
+                : ''}"
+            >
+              {#if player.away.team}
+                {#if player.away.opponent}
+                  <div class="playerTeam">
+                    {player.away.opponent} vs{player.away.pos != "DEF"
+                      ? ` ${player.away.team}`
+                      : ""}
+                  </div>
+                {:else}
+                  <div class="playerTeam">
+                    {player.away.pos != "DEF" ? player.away.team : ""}
+                  </div>
+                {/if}
+              {/if}
+              <span class="playerInfo playerName playerNameAway"
+                >{player.away.name}</span
+              >
+            </div>
+            <span class="points pointsL"
+              >{round(player.away.points)}
+              <div class="totalProjection">
+                {round(player.away.projection)}
+              </div></span
+            >
+          </div>
+        </div>
+      {/each}
+      {#if !expandOverride}
+        <div class="close" on:click={() => expandClose()}>Close Matchup</div>
+      {/if}
+    </div>
+  </div>
+{/if}
 
 <style>
-    .matchup {
-        width: 95%;
-        max-width: 600px;
-        margin: 10px auto;
-    }
+  .matchup {
+    width: 95%;
+    max-width: 600px;
+    margin: 10px auto;
+  }
 
-    .header {
-        display: flex;
-        justify-content: space-between;
-        position: relative;
-        border: 1px solid #bbb;
-        border-radius: 8px;
-        opacity: 0.8;
-        cursor: pointer;
-		    transition: opacity 0.5s;
-        overflow: hidden;
-    }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    border: 1px solid #bbb;
+    border-radius: 8px;
+    opacity: 0.8;
+    cursor: pointer;
+    transition: opacity 0.5s;
+    overflow: hidden;
+  }
 
-    .header-expanded {
-        display: flex;
-        justify-content: space-between;
-        position: relative;
-        border: 1px solid #bbb;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-        opacity: 0.8;
-        cursor: pointer;
-        transition: opacity 0.5s;
-        overflow: hidden;
-    }
+  .header-expanded {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    border: 1px solid #bbb;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    opacity: 0.8;
+    cursor: pointer;
+    transition: opacity 0.5s;
+    overflow: hidden;
+  }
 
-    .header:hover {
-        opacity: 1;
-    }
+  .header:hover {
+    opacity: 1;
+  }
 
-    .opponent {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        padding: 5px 2%;
-        top: 0;
-        z-index: 2;
-    }
+  .opponent {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 5px 2%;
+    top: 0;
+    z-index: 2;
+  }
 
-    .divider {
-        position: absolute;
-        z-index: 3;
-        transform: translateX(-50%);
-        top: 0;
-        left: 50%;
-        height: 100%;
-        width: 15px;
-    }
+  .divider {
+    position: absolute;
+    z-index: 3;
+    transform: translateX(-50%);
+    top: 0;
+    left: 50%;
+    height: 100%;
+    width: 15px;
+  }
 
-    .home {
-        justify-content: flex-start;
-        left: 0;
-        text-align: left;
-        background-color: #485566;
-    }
+  .home {
+    justify-content: flex-start;
+    left: 0;
+    text-align: left;
+    background-color: #485566;
+  }
 
-    :global(.homeGlow) {
-        box-shadow: 0 0 6px 4px #3279cf;
-        background-color: #00316b !important;
-    }
+  :global(.homeGlow) {
+    box-shadow: 0 0 6px 4px #3279cf;
+    background-color: #00316b !important;
+  }
 
-    .away {
-        justify-content: flex-end;
-        right: 0;
-        text-align: right;
-        background-color: #8b6969;
-    }
+  .away {
+    justify-content: flex-end;
+    right: 0;
+    text-align: right;
+    background-color: #8b6969;
+  }
 
-    :global(.awayGlow) {
-        box-shadow: 0 0 6px 4px #d15454;
-        background-color: #920505 !important;
-    }
+  :global(.awayGlow) {
+    box-shadow: 0 0 6px 4px #d15454;
+    background-color: #920505 !important;
+  }
 
+  .name {
+    margin: 0 5px;
+    font-size: 1em;
+    line-height: 1.1em;
+    flex-grow: 1;
+    word-break: break-word;
+    color: #fff;
+    font-style: italic;
+  }
+
+  .avatar {
+    vertical-align: middle;
+    border-radius: 50%;
+    height: 35px;
+    width: 35px;
+    margin: 0;
+    border: 0.25px solid #777;
+    background-color: #eee;
+  }
+
+  .playerAvatar {
+    position: relative;
+    vertical-align: middle;
+    height: 45px;
+    width: 45px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: auto 45px;
+  }
+  .pos {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    max-width: 32px;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .QB {
+    background-color: var(--QB);
+  }
+
+  .WR {
+    background-color: var(--WR);
+  }
+
+  .RB {
+    background-color: var(--RB);
+  }
+
+  .TE {
+    background-color: var(--TE);
+  }
+
+  .FLEX {
+    background: linear-gradient(
+      to right,
+      var(--WR),
+      var(--WR) 33.33%,
+      var(--RB) 33.33%,
+      var(--RB) 66.66%,
+      var(--TE) 66.66%
+    );
+  }
+
+  .WRRB {
+    background: linear-gradient(
+      to right,
+      var(--WR),
+      var(--WR) 50%,
+      var(--RB) 50%
+    );
+  }
+
+  .K {
+    background-color: var(--K);
+  }
+
+  .DEF {
+    background-color: var(--DEF);
+  }
+
+  .DL,
+  .DE,
+  .DT {
+    background-color: var(--DL);
+  }
+
+  .LB {
+    background-color: var(--LB);
+  }
+
+  .DB,
+  .CB,
+  .SS,
+  .FS {
+    background-color: var(--DB);
+  }
+
+  .IDP {
+    background: linear-gradient(
+      to right,
+      var(--DL),
+      var(--DL) 33.33%,
+      var(--LB) 33.33%,
+      var(--LB) 66.66%,
+      var(--DB) 66.66%
+    );
+  }
+
+  .rosters {
+    position: relative;
+    background-color: var(--fff);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    overflow: hidden;
+    border-left: 1px solid #bbb;
+    border-right: 1px solid #bbb;
+    border-bottom: 1px solid #bbb;
+    transition: max-height 0.4s;
+  }
+
+  .line {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #bbb;
+  }
+
+  .player {
+    position: relative;
+    width: 46%;
+  }
+
+  .iconAndTeam {
+    display: flex;
+    align-items: center;
+  }
+
+  .iconAndTeamHome {
+    justify-content: flex-start;
+  }
+
+  .iconAndTeamAway {
+    justify-content: flex-end;
+  }
+
+  .playerHome {
+    padding: 0 1.5% 0 2.5%;
+    text-align: left;
+  }
+
+  .playerAway {
+    padding: 0 2.5% 0 1.5%;
+    text-align: right;
+  }
+
+  .playerInfo {
+    display: inline-block;
+    padding: 0 6px;
+  }
+
+  .playerTeam {
+    display: inline-block;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    font-size: 0.5em;
+  }
+
+  .playerName {
+    word-break: break-word;
+  }
+
+  .playerNameHome {
+    text-align: left;
+  }
+
+  .playerNameAway {
+    text-align: right;
+  }
+
+  @media (max-width: 500px) {
     .name {
-        margin: 0 5px;
-        font-size: 1em;
-        line-height: 1.1em;
-        flex-grow: 1;
-        word-break: break-word;
-        color: #fff;
-        font-style: italic;
+      font-size: 0.8em;
     }
-
-	.avatar {
-		vertical-align: middle;
-		border-radius: 50%;
-		height: 35px;
-		width: 35px;
-		margin: 0;
-		border: 0.25px solid #777;
-        background-color: #eee;
-	}
-
-	.playerAvatar {
-        position: relative;
-		vertical-align: middle;
-		height: 45px;
-		width: 45px;
-		background-position: center;
-		background-repeat: no-repeat;
-		background-size: auto 45px;
-	}
-	.pos {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 8px;
-        max-width: 32px;
-        min-width: 32px;
-		height: 32px;
-	}
-
-	.QB {
-		background-color: var(--QB);
-	}
-
-	.WR {
-		background-color: var(--WR);
-	}
-
-	.RB {
-		background-color: var(--RB);
-	}
-
-	.TE {
-		background-color: var(--TE);
-	}
-
-	.FLEX {
-		background: linear-gradient(to right, var(--WR), var(--WR) 33.33%, var(--RB) 33.33%, var(--RB) 66.66%, var(--TE) 66.66%);
-	}
-
-	.WRRB {
-		background: linear-gradient(to right, var(--WR), var(--WR) 50%, var(--RB) 50%);
-	}
-
-	.K {
-		background-color: var(--K);
-	}
-
-	.DEF {
-		background-color: var(--DEF);
-	}
-
-    .DL, .DE, .DT {
-        background-color: var(--DL);
-    }
-
-    .LB {
-        background-color: var(--LB);
-    }
-
-    .DB, .CB, .SS, .FS {
-        background-color: var(--DB);
-    }
-
-    .IDP {
-        background: linear-gradient(to right, var(--DL), var(--DL) 33.33%, var(--LB) 33.33%, var(--LB) 66.66%, var(--DB) 66.66%);
-    }
-
-    .rosters {
-        position: relative;
-        background-color: var(--fff);
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
-        overflow: hidden;
-        border-left: 1px solid #bbb;
-        border-right: 1px solid #bbb;
-        border-bottom: 1px solid #bbb;
-		    transition: max-height 0.4s;
-    }
-
-    .line {
-        position: relative;
-        display: flex;
-        justify-content: space-between;
-        border-top: 1px solid #bbb;
-    }
-
-    .player {
-        position: relative;
-        width: 46%;
-    }
-
-    .iconAndTeam {
-        display: flex;
-        align-items: center;
-    }
-
-    .iconAndTeamHome {
-        justify-content: flex-start;
-    }
-
-    .iconAndTeamAway {
-        justify-content: flex-end;
-    }
-
-    .playerHome {
-        padding: 0 1.5% 0 2.5%;
-        text-align: left;
-    }
-
-    .playerAway {
-        padding: 0 2.5% 0 1.5%;
-        text-align: right;
-    }
-
-    .playerInfo {
-        display: inline-block;
-        padding: 0 6px;
-    }
-
-    .playerTeam {
-        display: inline-block;
-        color: #888;
-        font-style: italic;
-        text-align: center;
-        font-size: 0.5em;
-    }
-
-    .playerName {
-        word-break: break-word;
-    }
-
-    .playerNameHome {
-        text-align: left;
-    }
-
-    .playerNameAway {
-        text-align: right;
-    }
-
-    @media (max-width: 500px) {
-        .name {
-            font-size: 0.8em;
-        }
-        .totalPoints {
-            font-size: 0.8em;
-        }
-        .nameHolder {
-            font-size: 0.8em;
-        }
-        .points {
-            font-size: 0.9em;
-        }
-    }
-
-    @media (max-width: 410px) {
-        .name {
-            font-size: 0.7em;
-        }
-        .totalPoints {
-            font-size: 0.7em;
-        }
-        .nameHolder {
-            font-size: 0.7em;
-        }
-        .points {
-            font-size: 0.75em;
-        }
-    }
-
-    @media (max-width: 360px) {
-        .name {
-            font-size: 0.5em;
-        }
-        .totalPoints {
-            font-size: 0.5em;
-        }
-    }
-
-    .dividerLine {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 50%;
-        height: 100%;
-        width: 0;
-        border-left: 1px solid var(--eee);
-        z-index: 1;
-    }
-
-    .close {
-        display: block;
-        width: 100%;
-        background-color: var(--eee);
-        text-align: center;
-        cursor: pointer;
-        z-index: 2;
-        font-size: 1.1em;
-        padding: 6px 0;
-    }
-
-    .close:hover {
-        background-color: var(--ddd);
-    }
-
-    .nameHolder {
-        display: block;
-    }
-
-    .nameHolderR {
-        justify-content: flex-end;
-        text-align: right;
-    }
-
-    .nameHolderL {
-        justify-content: flex-start;
-        text-align: left;
-    }
-
     .totalPoints {
-        line-height: 1.1em;
-        color: #fff;
+      font-size: 0.8em;
     }
-
-    .totalPointsR {
-        width: 54px;
-        margin-right: 0.1em;
-        text-align: right;
+    .nameHolder {
+      font-size: 0.8em;
     }
-
-    .totalPointsSpaceR {
-        width: 54px;
-        margin-right: 0.25em;
-        text-align: right;
-    }
-
-    .totalPointsL {
-        margin-left: 0.1em;
-        text-align: left;
-    }
-
-    .totalProjection {
-        color: #ccc;
-        font-size: 0.7em;
-        font-style: italic;
-    }
-
     .points {
-        position: absolute;
-        line-height: 1.1em;
-        top: 1em;
+      font-size: 0.9em;
     }
+  }
 
-    .pointsL {
-        left: 1em;
+  @media (max-width: 410px) {
+    .name {
+      font-size: 0.7em;
     }
+    .totalPoints {
+      font-size: 0.7em;
+    }
+    .nameHolder {
+      font-size: 0.7em;
+    }
+    .points {
+      font-size: 0.75em;
+    }
+  }
 
-    .pointsR {
-        right: 1em;
+  @media (max-width: 360px) {
+    .name {
+      font-size: 0.5em;
     }
+    .totalPoints {
+      font-size: 0.5em;
+    }
+  }
 
-    .playerEmpty {
-        height: 100%;
-        color: #555;
-        font-style: italic;
-        display: flex;
-        align-items: center;
-    }
+  .dividerLine {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    width: 0;
+    border-left: 1px solid var(--eee);
+    z-index: 1;
+  }
+
+  .close {
+    display: block;
+    width: 100%;
+    background-color: var(--eee);
+    text-align: center;
+    cursor: pointer;
+    z-index: 2;
+    font-size: 1.1em;
+    padding: 6px 0;
+  }
+
+  .close:hover {
+    background-color: var(--ddd);
+  }
+
+  .nameHolder {
+    display: block;
+  }
+
+  .nameHolderR {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .nameHolderL {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .totalPoints {
+    line-height: 1.1em;
+    color: #fff;
+  }
+
+  .totalPointsR {
+    width: 54px;
+    margin-right: 0.1em;
+    text-align: right;
+  }
+
+  .totalPointsSpaceR {
+    width: 54px;
+    margin-right: 0.25em;
+    text-align: right;
+  }
+
+  .totalPointsL {
+    margin-left: 0.1em;
+    text-align: left;
+  }
+
+  .totalProjection {
+    color: #ccc;
+    font-size: 0.7em;
+    font-style: italic;
+  }
+
+  .points {
+    position: absolute;
+    line-height: 1.1em;
+    top: 1em;
+  }
+
+  .pointsL {
+    left: 1em;
+  }
+
+  .pointsR {
+    right: 1em;
+  }
+
+  .playerEmpty {
+    height: 100%;
+    color: #555;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+  }
+  .teamLogo {
+    width: 21px;
+    position: absolute;
+    top: 0;
+  }
+  .teamHomeLogo {
+    right: -16px;
+  }
+  .teamAwayLogo {
+    left: -16px;
+  }
+  @media (max-width: 340px) {
     .teamLogo {
-        width: 21px;
-        position: absolute;
-        top: 0;
+      width: 20px;
     }
     .teamHomeLogo {
-        right: -16px;
+      right: -7px;
     }
     .teamAwayLogo {
-        left: -16px;
+      left: -7px;
     }
-    @media (max-width: 340px) {
-        .teamLogo {
-            width: 20px;
-        }
-        .teamHomeLogo {
-            right: -7px;
-        }
-        .teamAwayLogo {
-            left: -7px;
-        }
-    }
+  }
 
-    .arithmetic-signs {
-        font-size: 1em;
-        color: #fff;
-        margin: 0 10px;
-    }
+  .arithmetic-signs {
+    font-size: 1em;
+    color: #fff;
+    margin: 0 10px;
+  }
 
-    .weekPlayerLabel {
-        text-align: center;
-        text-decoration: underline;
-    }
+  .weekPlayerLabel {
+    text-align: center;
+    text-decoration: underline;
+  }
 
-    .playerHeading {
-        display: flex;
-        justify-content: space-between;
-        padding: 5px 14px;
-        border-bottom: 1px solid #bbb;
-        border-top-left-radius: 0 !important;
-        border-top-right-radius: 0 !important;
-    }
+  .playerHeading {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 14px;
+    border-bottom: 1px solid #bbb;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+  }
 </style>
-
-<div class="matchup">
-    <div class={clsx(active !== ix && 'header', active == ix && 'header-expanded')} on:click={() => expandClose()} bind:this={el} >
-        <div class={clsx('opponent', 'homeGlow', team.isEliminated && 'awayGlow')}>
-            <img class="avatar" src={team.manager.avatar} alt="home team avatar" />
-            <div class="name">{team.manager.name}</div>
-            <div class="totalPoints totalPointsSpaceR">{round(homePointsA)}<div class="totalProjection">{round(projectionATotal)}</div></div>
-            <span class="arithmetic-signs">+</span>
-            <div class="totalPoints totalPointsSpaceR">{round(homePointsB)}<div class="totalProjection">{round(projectionBTotal)}</div></div>
-            <span class="arithmetic-signs">=</span>
-            <div class="totalPoints totalPointsR">{round(homePointsTotal)}<div class="totalProjection">{round(projectionATotal + projectionBTotal)}</div></div>
-        </div>
-<!--        <img class="divider" src="/{winning}Divider.jpg" alt="divider" />-->
-<!--        <div class="opponent away{winning == "away" ? " awayGlow" : ""}">-->
-<!--            <div class="totalPoints totalPointsL">{round(awayPointsTotal)}<div class="totalProjection">{round(awayProjectionTotal)}</div></div>-->
-<!--            <div class="name" >{away.manager.name}</div>-->
-<!--            <img class="avatar" src={away.manager.avatar} alt="away team avatar" />-->
-<!--        </div>-->
-    </div>
-
-    <div class="rosters" style="max-height: {active == ix ? calcHeight() + "px" : "0"}; {active != ix ? "border: none" : ""};">
-        <div class="playerHeading">
-            <span class="weekPlayerLabel">
-                Week {weekA} Players
-            </span>
-            <span class="weekPlayerLabel">
-                Week {weekB} Players
-            </span>
-        </div>
-
-
-        {#each starters as player}
-            <div class="line">
-                <div class="player playerHome">
-                    <span class="iconAndTeam iconAndTeamHome">
-                        {#if player.home.pos}
-                            <span class="pos {player.home.pos}">{player.home.pos}</span>
-                        {/if}
-                        {#if player.home.avatar}
-                            <div class="playerAvatar playerInfo" style="{player.home.avatar}">
-                                {#if player.home.team && player.home.pos != "DEF"}
-                                    <img src="https://sleepercdn.com/images/team_logos/nfl/{player.home.team.toLowerCase()}.png" class="teamLogo teamHomeLogo" alt="team logo"/>
-                                {/if}
-                            </div>
-                        {/if}
-                    </span>
-                    <div class="nameHolder nameHolderL{player.home.name == 'Empty'? ' playerEmpty' : ''}">
-                        <span class="playerInfo playerName playerNameHome">{player.home.name}</span>
-                        {#if player.home.team}
-                            {#if player.home.opponent}
-                                <div class="playerTeam">{player.home.pos != "DEF" ? `${player.home.team} ` : ""}vs {player.home.opponent}</div>
-                            {:else}
-                                <div class="playerTeam">{player.home.pos != "DEF" ? player.home.team : ""}</div>
-                            {/if}
-                        {/if}
-                    </div>
-                    <span class="points pointsR">{round(player.home.points)}<div class="totalProjection">{round(player.home.projection)}</div></span>
-                </div>
-
-                <div class="dividerLine" />
-
-                <div class="player playerAway">
-                    <span class="iconAndTeam iconAndTeamAway">
-                        {#if player.away.avatar}
-                            <div class="playerAvatar playerInfo" style="{player.away.avatar}">
-                                {#if player.away.team && player.away.pos != "DEF"}
-                                    <img src="https://sleepercdn.com/images/team_logos/nfl/{player.away.team.toLowerCase()}.png" class="teamLogo teamAwayLogo" alt="team logo"/>
-                                {/if}
-                            </div>
-                        {/if}
-                        {#if player.away.pos}
-                            <span class="pos {player.away.pos}">{player.away.pos}</span>
-                        {/if}
-                    </span>
-                    <div class="nameHolder nameHolderR{player.away.name == 'Empty'? ' playerEmpty' : ''}">
-                        {#if player.away.team}
-                            {#if player.away.opponent}
-                                <div class="playerTeam">{player.away.opponent} vs{player.away.pos != "DEF" ? ` ${player.away.team}` : ""}</div>
-                            {:else}
-                                <div class="playerTeam">{player.away.pos != "DEF" ? player.away.team : ""}</div>
-                            {/if}
-                        {/if}
-                        <span class="playerInfo playerName playerNameAway">{player.away.name}</span>
-                    </div>
-                    <span class="points pointsL">{round(player.away.points)}<div class="totalProjection">{round(player.away.projection)}</div></span>
-                </div>
-            </div>
-        {/each}
-        {#if !expandOverride}
-            <div class="close" on:click={() => expandClose()}>Close Matchup</div>
-        {/if}
-    </div>
-</div>

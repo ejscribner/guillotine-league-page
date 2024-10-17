@@ -1,16 +1,22 @@
-import { getLeagueData, getLeagueRosters, getLeagueTeamManagers, loadPlayers, waitForAll } from '$lib/utils/helper';
+import {
+  getLeagueData,
+  getLeagueRosters,
+  getLeagueTeamManagers,
+  loadPlayers,
+  waitForAll,
+} from "$lib/utils/helper";
 
-export async function load({fetch}) {
-    const rostersInfo = waitForAll(
-        getLeagueData(),
-        getLeagueRosters(),
-        getLeagueTeamManagers(),
-        loadPlayers(fetch),
-    )
+export async function load({ fetch }) {
+  const rostersInfo = waitForAll(
+    getLeagueData(),
+    getLeagueRosters(),
+    getLeagueTeamManagers(),
+    loadPlayers(fetch)
+  );
 
-    // todo: getleaguerosters returns some empty players and leaves more on the bench
+  // todo: getleaguerosters returns some empty players and leaves more on the bench
 
-    return {
-        rostersInfo
-    };
+  return {
+    rostersInfo,
+  };
 }
