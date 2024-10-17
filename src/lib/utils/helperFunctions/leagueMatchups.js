@@ -19,24 +19,16 @@ export const setBestBallLineups = (
 	- each week has an array of teams
 	- ech team has an array of {players[string-id], players_points{id: pts} starters[string-id], starter_points[scores]}
 	 */
-  // console.log(matchupsData)
-  // map all players by id to their profile {fn: string, ln: string, pos: string, t: string-team, wi: {p: string(proj), o: string(opponent)}[]}
-  // console.log(playersMap)
 
-  console.log(starterPositions);
   let localMatchupsData = structuredClone(matchupsData);
 
   // for (const week of matchupsData) {
   for (let weekIdx = 0; weekIdx < matchupsData.length; weekIdx++) {
     const week = matchupsData[weekIdx];
-    console.log(weekIdx + 1);
-    console.log(weekNumber);
     // for (const team of week) {
     for (let teamIdx = 0; teamIdx < week.length; teamIdx++) {
       let totalProjectedPoints = 0;
       const team = week[teamIdx];
-      console.log("YO");
-      console.log(team);
       // todo: team.starters no longer null anywhere?
       // try instead comparing current week with index
       // todo: check >=
@@ -58,13 +50,10 @@ export const setBestBallLineups = (
                   playersMap.players[playerId].wi[weekIdx + 1].p
                 ),
               };
-              // console.log(playersMap.players[playerId])
-              // console.log(playersMap.players[playerId].wi[i + 1])
             }
           })
           .sort((a, b) => b.projectedPoints - a.projectedPoints); // sort by points descending
 
-        // console.log(teamPlayers)
         teamPlayers.forEach((player) => {
           if (player) {
             const playerPositionIdx = positionsTracker.indexOf(
@@ -94,7 +83,6 @@ export const setBestBallLineups = (
             }
           }
         });
-        // console.log(newStarters)
 
         localMatchupsData[weekIdx][teamIdx].starters = newStarters;
         localMatchupsData[weekIdx][teamIdx].starters_points = new Array(
@@ -113,18 +101,11 @@ export const setBestBallLineups = (
               player: playersMap.players[playerId],
               points: team.players_points[playerId],
             };
-            // console.log(playersMap.players[playerId])
-            // console.log(team.players_points[playerId])
           })
           .sort((a, b) => b.points - a.points); // sort by points descending
 
-        // console.log(teamPlayers)
         teamPlayers.forEach((player) => {
-          // console.log(player.points)
-          // console.log(player.player.pos)
-          // console.log(newStarters[starterPositions.indexOf(player.player.pos)])
           if (newStarters[starterPositions.indexOf(player.player.pos)] === 0) {
-            // console.log('start')
             // todo: check this once we have some data for the week
             // todo: handle starter_pointsf
             newStarters[starterPositions.indexOf(player.player.pos)] =
@@ -133,7 +114,6 @@ export const setBestBallLineups = (
         });
       }
     }
-    // console.log('---')
   }
 
   return localMatchupsData;
@@ -196,10 +176,6 @@ export const getLeagueMatchups = async (playersData) => {
     await getStarterPositions(leagueData),
     week
   );
-  // console.log('ABCDEFG')
-  // console.log(matchupsData)
-  // console.log(newMatchupsData)
-  // console.log('HIJKLMNOP')
 
   const matchupWeeks = [];
   // process all the matchups

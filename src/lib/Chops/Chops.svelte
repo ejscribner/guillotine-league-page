@@ -21,8 +21,6 @@
 
   let loading = true;
 
-  // console.log(chopsData)
-
   onMount(async () => {
     const matchupsInfo = await matchupsData;
     leagueTeamManagers = await leagueTeamManagersData;

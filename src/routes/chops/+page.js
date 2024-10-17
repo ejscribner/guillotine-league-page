@@ -14,12 +14,7 @@ export async function load({ url, fetch }) {
   const matchupsData = getLeagueMatchups(playersData);
   // matchupsData knows the week
 
-  console.log("****");
-  console.log(matchupsData);
-
   // being set incorrectly by the nav
-  // console.log('8989898')
-  // console.log(queryWeek)
 
   return {
     queryWeek: isNaN(queryWeek) ? null : queryWeek,

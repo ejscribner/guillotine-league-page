@@ -82,7 +82,6 @@
       <Body>
         <!-- 	Standing	 -->
         {#each standings as standing}
-          {console.log(standing)}
           <Standing
             {columnOrder}
             {standing}

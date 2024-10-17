@@ -76,7 +76,6 @@
   // todo: figure out how this one looks up the players based on their id
   // starter is the players id, players[starter] is the player, and points is the actual points
   const digestStarter = (starter, points) => {
-    // console.log(starter)
     if (!starter || starter == 0) {
       return {
         name: "Empty",
@@ -89,10 +88,6 @@
       };
     }
     const player = players[starter];
-    // below has rpojected
-    // console.log(player)
-    // and points is the actual
-    //     console.log(points)
     let name =
       player.pos == "DEF" ? player.ln : `${player.fn[0]}. ${player.ln}`;
     let projection = 0;

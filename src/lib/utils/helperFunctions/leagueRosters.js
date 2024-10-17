@@ -22,8 +22,6 @@ export const getLeagueRosters = async (queryLeagueID = leagueID) => {
     console.error(err);
   });
 
-  console.log(res);
-
   if (res.ok) {
     const processedRosters = processRosters(data);
     rostersStore.update((r) => {
@@ -37,7 +35,6 @@ export const getLeagueRosters = async (queryLeagueID = leagueID) => {
 };
 
 const processRosters = (rosters) => {
-  console.log(rosters);
   const startersAndReserve = [];
   const rosterMap = {};
   for (const roster of rosters) {

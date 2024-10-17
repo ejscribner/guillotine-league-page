@@ -19,7 +19,6 @@
     weekA,
     weekB;
 
-  console.log(team); // team == matchup[0] essentially
 
   // let home = matchup[0];
   // let away = matchup[1];
@@ -27,8 +26,6 @@
   let homePointsA = team.pointsA.reduce((a, b) => a + b, 0);
   let homePointsB = team.pointsB.reduce((a, b) => a + b, 0);
   let homePointsTotal = homePointsA + homePointsB;
-
-  // console.log(team)
 
   let projectionATotal = 0;
   let projectionBTotal = 0;
@@ -58,7 +55,6 @@
     const startersB = matchupWeek
       ? team.startersB[matchupWeek]
       : team.startersB ?? [];
-    // console.log(team)
     if (startersA.length === 0) {
       team.starters = [];
     }
@@ -80,9 +76,6 @@
       // awayPointsTotal += awayPoint;
       const home = digestStarter(startersA[i], pointsA[i], weekA);
       const away = digestStarter(startersB[i], pointsB[i], weekB);
-      // console.log(team.manager)
-      // console.log(home)
-      // console.log(away)
       // const awayStarter = awayStarters ? awayStarters[i] : null;
       // const away = digestStarter(awayStarter, awayPoint);
       projectionATotal += home.projection;
@@ -113,8 +106,6 @@
       player.pos == "DEF" ? player.ln : `${player.fn[0]}. ${player.ln}`;
     let projection = 0;
     if (player.wi && player.wi[week]) {
-      // console.log(player)
-      // console.log(week)
       projection = parseFloat(player.wi[week].p);
     }
     return {

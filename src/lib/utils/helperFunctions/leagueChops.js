@@ -66,10 +66,6 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
     await getStarterPositions(leagueData),
     week
   );
-  // console.log('ABCDEFG')
-  // console.log(matchupsData)
-  console.log(newMatchupsData);
-  // console.log('HIJKLMNOP')
 
   // newMatchupsData.map((week) => {
   // 	return week.sort((teamA, teamB) => {
@@ -84,9 +80,6 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
   // });
   // todo: this sorts by week though? we need to do two week pairs. Should we sort after the chopPeriods instead?
 
-  console.log(newMatchupsData);
-
-  // console.log(matchupsData);
 
   const chopPeriods = [];
   // process all the matchups
@@ -119,7 +112,6 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
 
   matchupsStore.update(() => matchupsResponse);
 
-  console.log(matchupsResponse);
 
   return matchupsResponse;
 };
@@ -129,23 +121,14 @@ const processChops = (weekA, weekB, chopNumber) => {
     return false;
   }
 
-  // console.log('weekA')
-  // console.log(weekA)
-  // console.log('weekB')
-  // console.log(weekB)
-
   const teams = [];
   for (const teamA of weekA) {
     // Find the corresponding team in weekB by roster_id
     const teamB = weekB.find((team) => team.roster_id === teamA.roster_id);
 
     // TODO: sort with these
-    console.log(teamA.projected_points);
-    console.log(teamB.projected_points);
     const totalProjectedPoints =
       teamA.projected_points + teamB.projected_points;
-    console.log(teamA.starters_points.reduce((a, b) => a + b, 0));
-    console.log(teamB.starters_points.reduce((a, b) => a + b, 0));
     const totalPoints =
       teamA.starters_points.reduce((a, b) => a + b, 0) +
       teamB.starters_points.reduce((a, b) => a + b, 0);

@@ -277,7 +277,6 @@ export const getTeamFromTeamManagers = (teamManagers, rosterID, year) => {
     year = teamManagers.currentSeason;
   }
 
-  // console.log(teamManagers.teamManagersMap)
   return teamManagers.teamManagersMap[year][rosterID]["team"];
 };
 
@@ -286,7 +285,6 @@ export const isTeamEliminated = (teamManagers, rosterID, year) => {
     year = teamManagers.currentSeason;
   }
 
-  // console.log(teamManagers.teamManagersMap)
   return teamManagers.teamManagersMap[year][rosterID]["isEliminated"];
 };
 

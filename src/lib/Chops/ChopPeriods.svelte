@@ -13,7 +13,6 @@
     regularSeasonLength,
     selection,
     leagueTeamManagers;
-  // console.log(chopPeriods)
 
   let displayWeek = queryWeek * 1 || 1;
 
@@ -35,7 +34,6 @@
       return;
     }
     // processDisplayMatchup(displayWeek)
-    // console.log('processing the chops')
     processDisplayChop(displayWeek);
   });
 
@@ -58,8 +56,6 @@
   };
 
   const processDisplayChop = (newWeek) => {
-    // console.log(chopPeriods)
-    // console.log('PROCESSING AND DISPLAYING CHOPS')
     const chop = chopPeriods[newWeek - 1];
 
     weekA = chop.weekA;
@@ -67,14 +63,11 @@
 
     teamArray = chop.teams;
 
-    // console.log(teamArray)
-
     // teamArray.sort((a, b) => {
     //     // Ensure eliminated teams are always at the end
     //     if (a.isEliminated && !b.isEliminated) return 1;
     //     if (!a.isEliminated && b.isEliminated) return -1;
     //
-    //     console.log(a)
     //
     //     // Now handle the points comparison
     //     const totalA = a.pointsA.reduce((acc, cur) => acc + cur, 0) + a.pointsB.reduce((acc, cur) => acc + cur, 0);

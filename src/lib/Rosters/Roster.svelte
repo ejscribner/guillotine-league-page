@@ -17,9 +17,6 @@
       roster.roster_id
     ].team;
 
-  // console.log(startersAndReserve)
-  // console.log(roster)
-
   let i = 0;
 
   const digestData = (
