@@ -110,10 +110,6 @@
     {/if}
   </div>
   <div class="chopHeader">
-    <p>
-      Chop #{displayWeek} is a two-week period where the team with the lowest combined
-      score from weeks {weekA} and {weekB} is eliminated.
-    </p>
     <div class="weekLabels">
       <p class="teamNameLabel">Team Name</p>
       <p class="weekLabel">Week {weekA}</p>
