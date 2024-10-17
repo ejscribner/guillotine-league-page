@@ -37,8 +37,7 @@
   <title
     >{!$page.url.pathname[1]
       ? "Home"
-      : $page.url.pathname[1].toUpperCase() + $page.url.pathname.slice(2)} | League
-    Page</title
+      : $page.url.pathname[1].toUpperCase() + $page.url.pathname.slice(2)} | West Coast Guillotine</title
   >
 </svelte:head>
 
