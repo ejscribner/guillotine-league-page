@@ -92,7 +92,7 @@ export const setBestBallLineups = (
           teamIdx
         ].projected_points = totalProjectedPoints;
       } else if (team.starters && team.players && team.players_points) {
-        // Start with a fresh new starters array based on existing starters
+        // Start with a fresh new starters array
         let newStarters = new Array(starterPositions.length).fill(null);
         let totalPoints = 0;
 
@@ -101,13 +101,23 @@ export const setBestBallLineups = (
 
         const teamPlayers = team.players
             .map((playerId) => {
+              const actualPoints = team.players_points[playerId] || 0;
+              const projectedPoints =
+                  playersMap.players[playerId]?.wi?.[weekIdx + 1]?.p || 0;
               return {
                 player: playersMap.players[playerId],
-                points: team.starters_points[playerId] || 0, // Ensure to use actual points
+                actualPoints,
+                projectedPoints,
                 playerId,
               };
             })
-            .sort((a, b) => b.points - a.points); // Sort by actual points descending
+            .sort((a, b) => {
+              // Sort by actual points first, then fallback to projected points
+              if (b.actualPoints !== a.actualPoints) {
+                return b.actualPoints - a.actualPoints; // Prioritize actual points
+              }
+              return b.projectedPoints - a.projectedPoints; // Fall back to projections
+            });
 
         // Iterate through the sorted team players and assign starters
         teamPlayers.forEach((player) => {
@@ -117,14 +127,14 @@ export const setBestBallLineups = (
           if (playerPosIdx !== -1 && !newStarters[playerPosIdx]) {
             newStarters[playerPosIdx] = player.playerId;
             positionsTracker[playerPosIdx] = null; // Mark the position as filled
-            totalPoints += player.points;
+            totalPoints += player.actualPoints || player.projectedPoints; // Add points
           } else if (["RB", "WR", "TE"].includes(player.player.pos)) {
             // Try to fill a FLEX position if the player doesn't fit into a core spot
             const flexPosIdx = positionsTracker.indexOf("FLEX");
             if (flexPosIdx !== -1 && !newStarters[flexPosIdx]) {
               newStarters[flexPosIdx] = player.playerId;
               positionsTracker[flexPosIdx] = null; // Mark the FLEX spot as filled
-              totalPoints += player.points;
+              totalPoints += player.actualPoints || player.projectedPoints; // Add points
             }
           }
         });
