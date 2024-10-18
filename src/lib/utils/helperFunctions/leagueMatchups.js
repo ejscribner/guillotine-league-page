@@ -31,9 +31,9 @@ export const setBestBallLineups = (
       const team = week[teamIdx];
       // todo: team.starters no longer null anywhere?
       // try instead comparing current week with index
-      // todo: check >=
+      // todo: check >= - and check week 8 to be sure
       if (
-        (!team.starters || weekIdx + 1 >= weekNumber) &&
+        (!team.starters || weekIdx + 1 > weekNumber) &&
         team.players &&
         team.players_points
       ) {
@@ -92,27 +92,51 @@ export const setBestBallLineups = (
           teamIdx
         ].projected_points = totalProjectedPoints;
       } else if (team.starters && team.players && team.players_points) {
-        // todo: better logic here
-        // HANDLE THE CASE WHERE THE STARTERS ARE ALREADY SET, not use proj
-        let newStarters = team.starters;
-        const teamPlayers = team.players
-          .map((playerId) => {
-            return {
-              player: playersMap.players[playerId],
-              points: team.players_points[playerId],
-            };
-          })
-          .sort((a, b) => b.points - a.points); // sort by points descending
+        // Start with a fresh new starters array based on existing starters
+        let newStarters = new Array(starterPositions.length).fill(null);
+        let totalPoints = 0;
 
+        // Create a copy of the positions tracker to track available starter spots
+        let positionsTracker = Array.from(starterPositions);
+
+        const teamPlayers = team.players
+            .map((playerId) => {
+              return {
+                player: playersMap.players[playerId],
+                points: team.starters_points[playerId] || 0, // Ensure to use actual points
+                playerId,
+              };
+            })
+            .sort((a, b) => b.points - a.points); // Sort by actual points descending
+
+        // Iterate through the sorted team players and assign starters
         teamPlayers.forEach((player) => {
-          if (newStarters[starterPositions.indexOf(player.player.pos)] === 0) {
-            // todo: check this once we have some data for the week
-            // todo: handle starter_pointsf
-            newStarters[starterPositions.indexOf(player.player.pos)] =
-              player.player.id;
+          const playerPosIdx = positionsTracker.indexOf(player.player.pos);
+
+          // Fill core positions (QB, RB, WR, TE) if they are not already filled
+          if (playerPosIdx !== -1 && !newStarters[playerPosIdx]) {
+            newStarters[playerPosIdx] = player.playerId;
+            positionsTracker[playerPosIdx] = null; // Mark the position as filled
+            totalPoints += player.points;
+          } else if (["RB", "WR", "TE"].includes(player.player.pos)) {
+            // Try to fill a FLEX position if the player doesn't fit into a core spot
+            const flexPosIdx = positionsTracker.indexOf("FLEX");
+            if (flexPosIdx !== -1 && !newStarters[flexPosIdx]) {
+              newStarters[flexPosIdx] = player.playerId;
+              positionsTracker[flexPosIdx] = null; // Mark the FLEX spot as filled
+              totalPoints += player.points;
+            }
           }
         });
+
+        // After processing all players, update the starters and their points in the local data
+        localMatchupsData[weekIdx][teamIdx].starters = newStarters;
+        localMatchupsData[weekIdx][teamIdx].starters_points = newStarters.map(
+            (starterId) => (starterId ? team.players_points[starterId] || 0 : 0)
+        );
+        localMatchupsData[weekIdx][teamIdx].total_points = totalPoints;
       }
+
     }
   }
 
@@ -170,12 +194,14 @@ export const getLeagueMatchups = async (playersData) => {
 
   const playersMap = await playersData;
 
-  const newMatchupsData = setBestBallLineups(
-    matchupsData,
-    playersMap,
-    await getStarterPositions(leagueData),
-    week
-  );
+  // const newMatchupsData = setBestBallLineups(
+  //   matchupsData,
+  //   playersMap,
+  //   await getStarterPositions(leagueData),
+  //   week
+  // );
+
+  const newMatchupsData = matchupsData;
 
   const matchupWeeks = [];
   // process all the matchups
