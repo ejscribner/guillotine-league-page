@@ -157,11 +157,11 @@
 
 <svelte:window bind:innerWidth />
 
-{#if team.manager.name === "Unknown Team"}{:else}
+{#if team.manager.name !== "Unknown Team"}
   <div class="matchup">
     <div
       class={clsx(active !== ix && "header", active == ix && "header-expanded")}
-      on:click={() => expandClose()}
+      on:click={!team.isEliminated && expandClose()}
       bind:this={el}
     >
       <div
@@ -194,6 +194,7 @@
       <!--        </div>-->
     </div>
 
+    {#if !team.isEliminated}
     <div
       class="rosters"
       style="max-height: {active == ix ? calcHeight() + 'px' : '0'}; {active !=
@@ -312,6 +313,7 @@
         <div class="close" on:click={() => expandClose()}>Close Matchup</div>
       {/if}
     </div>
+    {/if}
   </div>
 {/if}
 
