@@ -77,8 +77,8 @@
       const away = digestStarter(startersB[i], pointsB[i], weekB);
       // const awayStarter = awayStarters ? awayStarters[i] : null;
       // const away = digestStarter(awayStarter, awayPoint);
-      projectionATotal += home.projection;
-      projectionBTotal += away.projection;
+      projectionATotal += home.points === 0 ? home.projection : home.points;
+      projectionBTotal += away.points === 0 ? away.projection : away.points;
       // awayProjectionTotal += away ? away.projection : 0;
       localStarters.push({ home, away });
     }
