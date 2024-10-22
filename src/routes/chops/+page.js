@@ -1,7 +1,7 @@
 import {
   getBrackets,
   getLeagueChops,
-  getLeagueMatchups,
+  getLeagueMatchups, getLeagueRosters,
   getLeagueTeamManagers,
   loadPlayers,
 } from "$lib/utils/helper";
@@ -20,8 +20,9 @@ export async function load({ url, fetch }) {
     queryWeek: isNaN(queryWeek) ? null : queryWeek,
     matchupsData,
     chopsData: getLeagueChops(2, 2, playersData),
-    bracketsData: getBrackets(),
+    // bracketsData: getBrackets(),
     leagueTeamManagersData: getLeagueTeamManagers(),
+    // leagueRosters: getLeagueRosters(), // todo: use this to put fab on the page
     playersData,
   };
 }
