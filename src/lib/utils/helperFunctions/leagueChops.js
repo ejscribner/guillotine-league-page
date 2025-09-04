@@ -95,8 +95,8 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
       chopPeriods.push({
         teams: processed.teams,
         chopNumber: processed.chopNumber,
-        weekA: i + 1,
-        weekB: i + 2,
+        weekA: i,
+        weekB: i + 1,
         // todo: add more params here, then sort on them
       });
     }
