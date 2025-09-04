@@ -68,7 +68,7 @@
     {matchupWeeks}
     {regularSeasonLength}
     {year}
-    week={Math.ceil((week - 1) / 2)}
+    week={Math.ceil((week) / 2)}
     bind:selection
     {leagueTeamManagers}
   />
