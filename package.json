@@ -39,7 +39,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": "22.x",
+    "node": "20.x",
     "npm": ">=6.0.0"
   },
   "scripts": {
@@ -78,7 +78,7 @@
     "@smui/tab": "6.0.0-beta.13",
     "@smui/tab-bar": "6.0.0-beta.13",
     "@smui/textfield": "6.0.0-beta.13",
-    "@sveltejs/adapter-vercel": "^5.10.2",
+    "@sveltejs/adapter-vercel": "^4.0.5",
     "@sveltejs/kit": "^1.15.2",
     "clsx": "^2.1.1",
     "contentful": "^9.1.34",
