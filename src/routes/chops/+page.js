@@ -19,7 +19,7 @@ export async function load({ url, fetch }) {
   return {
     queryWeek: isNaN(queryWeek) ? null : queryWeek,
     matchupsData,
-    chopsData: getLeagueChops(2, 2, playersData),
+    chopsData: getLeagueChops(2, 1, playersData),
     // bracketsData: getBrackets(),
     leagueTeamManagersData: getLeagueTeamManagers(),
     // leagueRosters: getLeagueRosters(), // todo: use this to put fab on the page
