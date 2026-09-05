@@ -1,5 +1,5 @@
 import { getLeagueData } from "./leagueData";
-import { leagueID } from "$lib/utils/leagueInfo";
+import { leagueID, regularSeasonLength } from "$lib/utils/leagueInfo";
 import { getNflState } from "./nflState";
 import { waitForAll } from "./multiPromise";
 import { get } from "svelte/store";
@@ -27,11 +27,11 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
     week = 18;
   }
   const year = leagueData.season;
-  const numChopPeriods = (leagueData.settings.playoff_week_start - 1) / period;
+  const numChopPeriods = Math.floor(regularSeasonLength / period);
 
   // pull in all matchup data for the season
   const matchupsPromises = [];
-  for (let i = 1; i < leagueData.settings.playoff_week_start; i++) {
+  for (let i = 1; i <= regularSeasonLength; i++) {
     matchupsPromises.push(
       fetch(`https://api.sleeper.app/v1/league/${leagueID}/matchups/${i}`, {
         compress: true,

@@ -1,5 +1,5 @@
 import { getLeagueData } from "./leagueData";
-import { leagueID } from "$lib/utils/leagueInfo";
+import { leagueID, regularSeasonLength } from "$lib/utils/leagueInfo";
 import { waitForAll } from "./multiPromise";
 import { get } from "svelte/store";
 import { upcomingDraft, previousDrafts } from "$lib/stores";
@@ -17,7 +17,6 @@ export const getUpcomingDraft = async () => {
   });
 
   const draftID = leagueData.draft_id;
-  const regularSeasonLength = leagueData.settings.playoff_week_start - 1;
 
   let year = parseInt(leagueData.season);
 
