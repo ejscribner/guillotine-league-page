@@ -1,4 +1,4 @@
-import { leagueID } from "$lib/utils/leagueInfo";
+import { leagueID, regularSeasonLength } from "$lib/utils/leagueInfo";
 import { getNflState } from "./nflState";
 import { getLeagueData } from "./leagueData";
 import { getLeagueRosters } from "./leagueRosters";
@@ -21,7 +21,6 @@ export const getLeagueStandings = async () => {
   });
 
   const yearData = leagueData.season;
-  const regularSeasonLength = leagueData.settings.playoff_week_start - 1;
   const divisions =
     leagueData.settings.divisions && leagueData.settings.divisions > 1;
   const rosters = rostersData.rosters;
