@@ -107,6 +107,8 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
     chopPeriods,
     year,
     numChopPeriods,
+    week,
+    regularSeasonLength,
   };
 
   matchupsStore.update(() => matchupsResponse);

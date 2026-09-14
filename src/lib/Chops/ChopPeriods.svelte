@@ -7,7 +7,6 @@
   export let queryWeek,
     players,
     chopPeriods,
-    matchupWeeks,
     year,
     week,
     regularSeasonLength,
@@ -25,7 +24,6 @@
         selection = "champions";
         return;
       }
-      // processDisplayMatchup(queryWeek)
       processDisplayChop(queryWeek);
       return;
     }
@@ -33,27 +31,15 @@
       selection = "champions";
       return;
     }
-    // processDisplayMatchup(displayWeek)
     processDisplayChop(displayWeek);
   });
 
-  let matchupArray = [];
   let teamArray = [];
   let weekA, weekB;
 
-  // rand is used as a hacky way to make sure that the each block re-renders when the matchupArray changes
+  // rand is used as a hacky way to make sure that the each block re-renders when the teamArray changes
   // the new arrays are too similar to the old ones for Svelte to pick up the difference
   let rand;
-
-  const processDisplayMatchup = (newWeek) => {
-    const matchup = matchupWeeks[newWeek - 1];
-    const allMatchups = matchup.matchups;
-    matchupArray = [];
-    for (const key in allMatchups) {
-      matchupArray.push(allMatchups[key]);
-    }
-    rand = Math.random();
-  };
 
   const processDisplayChop = (newWeek) => {
     const chop = chopPeriods[newWeek - 1];
@@ -82,7 +68,6 @@
 
   const changeWeek = (newWeek) => {
     displayWeek = newWeek;
-    // processDisplayMatchup(displayWeek);
     processDisplayChop(displayWeek);
     active = null;
     goto(`/chops?week=${displayWeek}`, { noscroll: true });
@@ -100,7 +85,7 @@
       <span class="spacer" />
     {/if}
     <h3 class="weekText">{year} - Chop #{displayWeek}</h3>
-    {#if displayWeek < matchupWeeks.length}
+    {#if displayWeek < chopPeriods.length}
       <Icon
         class="material-icons changeWeek"
         on:click={() => changeWeek(displayWeek + 1)}>chevron_right</Icon

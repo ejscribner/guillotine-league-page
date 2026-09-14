@@ -161,7 +161,7 @@
   <div class="matchup">
     <div
       class={clsx(active !== ix && "header", active == ix && "header-expanded")}
-      on:click={!team.isEliminated && expandClose()}
+      on:click={() => !team.isEliminated && expandClose()}
       bind:this={el}
     >
       <div
