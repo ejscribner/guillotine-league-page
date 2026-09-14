@@ -1,6 +1,7 @@
 import { get } from "svelte/store";
 import { players } from "$lib/stores";
 import { browser } from "$app/environment";
+import { timeoutSignal } from "./fetchTimeout";
 
 export const loadPlayers = async (servFetch, refresh = false) => {
   if (get(players)[1426]) {
@@ -34,7 +35,10 @@ export const loadPlayers = async (servFetch, refresh = false) => {
   }
 
   if (!playersInfo || !expiration || now > expiration) {
-    const res = await smartFetch(`/api/fetch_players_info`, { compress: true });
+    const res = await smartFetch(`/api/fetch_players_info`, {
+      compress: true,
+      signal: timeoutSignal(20000),
+    });
     const data = await res.json();
 
     if (!res.ok) {
