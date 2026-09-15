@@ -17,7 +17,8 @@
     leagueTeamManagers,
     year,
     weekA,
-    weekB;
+    weekB,
+    diff = null;
 
   // let home = matchup[0];
   // let away = matchup[1];
@@ -184,6 +185,9 @@
           <div class="totalProjection">
             {round(projectionATotal + projectionBTotal)}
           </div>
+          {#if diff !== null && diff !== undefined}
+            <div class="pointsDiff">-{round(diff)}</div>
+          {/if}
         </div>
       </div>
       <!--        <img class="divider" src="/{winning}Divider.jpg" alt="divider" />-->
@@ -682,6 +686,12 @@
 
   .totalProjection {
     color: #ccc;
+    font-size: 0.7em;
+    font-style: italic;
+  }
+
+  .pointsDiff {
+    color: #ffcc80;
     font-size: 0.7em;
     font-style: italic;
   }
