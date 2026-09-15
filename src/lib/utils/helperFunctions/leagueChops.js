@@ -1,11 +1,12 @@
 import { getLeagueData } from "./leagueData";
-import { leagueID } from "$lib/utils/leagueInfo";
+import { leagueID, regularSeasonLength } from "$lib/utils/leagueInfo";
 import { getNflState } from "./nflState";
 import { waitForAll } from "./multiPromise";
 import { get } from "svelte/store";
 import { matchupsStore } from "$lib/stores";
 import { getStarterPositions } from "$lib/utils/helperFunctions/predictOptimalScore.js";
 import { setBestBallLineups } from "$lib/utils/helperFunctions/leagueMatchups.js";
+import { timeoutSignal } from "./fetchTimeout";
 
 export const getLeagueChops = async (period, startWeek, playersData) => {
   // todo: new store for caching
@@ -16,9 +17,7 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
   const [nflState, leagueData] = await waitForAll(
     getNflState(),
     getLeagueData()
-  ).catch((err) => {
-    console.error(err);
-  });
+  );
 
   let week = 1;
   if (nflState.season_type == "regular") {
@@ -27,35 +26,32 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
     week = 18;
   }
   const year = leagueData.season;
-  const numChopPeriods = (leagueData.settings.playoff_week_start - 1) / period;
+  const numChopPeriods = Math.floor(regularSeasonLength / period);
 
   // pull in all matchup data for the season
   const matchupsPromises = [];
-  for (let i = 1; i < leagueData.settings.playoff_week_start; i++) {
+  for (let i = 1; i <= regularSeasonLength; i++) {
     matchupsPromises.push(
       fetch(`https://api.sleeper.app/v1/league/${leagueID}/matchups/${i}`, {
         compress: true,
+        signal: timeoutSignal(),
       })
     );
   }
   const matchupsRes = await waitForAll(...matchupsPromises);
 
-  // convert the json matchup responses
-  const matchupsJsonPromises = [];
-  for (const matchupRes of matchupsRes) {
-    const data = matchupRes.json();
-    matchupsJsonPromises.push(data);
-    if (!matchupRes.ok) {
-      throw new Error(data);
+  for (let i = 0; i < matchupsRes.length; i++) {
+    if (!matchupsRes[i].ok) {
+      throw new Error(
+        `Failed to fetch matchups for week ${i + 1} (status ${
+          matchupsRes[i].status
+        })`
+      );
     }
   }
-  const matchupsData = await waitForAll(...matchupsJsonPromises)
-    .catch((err) => {
-      console.error(err);
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+  const matchupsData = await waitForAll(
+    ...matchupsRes.map((res) => res.json())
+  );
 
   const playersMap = await playersData;
 
@@ -107,6 +103,8 @@ export const getLeagueChops = async (period, startWeek, playersData) => {
     chopPeriods,
     year,
     numChopPeriods,
+    week,
+    regularSeasonLength,
   };
 
   matchupsStore.update(() => matchupsResponse);

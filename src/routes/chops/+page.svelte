@@ -5,7 +5,6 @@
   export let data;
   const {
     queryWeek,
-    matchupsData,
     chopsData,
     bracketsData,
     playersData,
@@ -17,7 +16,6 @@
   <Chops
     {queryWeek}
     {chopsData}
-    {matchupsData}
     {bracketsData}
     {playersData}
     {leagueTeamManagersData}

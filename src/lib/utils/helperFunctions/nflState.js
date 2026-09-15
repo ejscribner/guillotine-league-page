@@ -1,5 +1,6 @@
 import { get } from "svelte/store";
 import { nflState } from "$lib/stores";
+import { timeoutSignal } from "./fetchTimeout";
 
 export const getNflState = async () => {
   if (get(nflState).season) {
@@ -7,12 +8,9 @@ export const getNflState = async () => {
   }
   const res = await fetch(`https://api.sleeper.app/v1/state/nfl`, {
     compress: true,
-  }).catch((err) => {
-    console.error(err);
+    signal: timeoutSignal(),
   });
-  const data = await res.json().catch((err) => {
-    console.error(err);
-  });
+  const data = await res.json();
 
   if (res.ok) {
     nflState.update(() => data);

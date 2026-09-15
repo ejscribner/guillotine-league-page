@@ -4,39 +4,55 @@ import { teamManagersStore } from "$lib/stores";
 import { waitForAll } from "./multiPromise";
 import { getManagers, getTeamData } from "./universalFunctions";
 import { getLeagueData } from "./leagueData";
+import { timeoutSignal } from "./fetchTimeout";
 
 export const getLeagueTeamManagers = async () => {
   if (get(teamManagersStore) && get(teamManagersStore).currentSeason) {
     return get(teamManagersStore);
   }
+
+  // walk the previous_league_id chain to find every season's league ID.
+  // this part has to be sequential (each season's ID is only known once the
+  // previous one is fetched), but getLeagueData caches its result, so the
+  // per-season users/rosters fetch below doesn't repeat this work.
+  const leagueIDs = [];
   let currentLeagueID = leagueID;
+  const seasonLeagueData = [];
+  while (currentLeagueID && currentLeagueID != 0) {
+    leagueIDs.push(currentLeagueID);
+    const leagueData = await getLeagueData(currentLeagueID);
+    seasonLeagueData.push(leagueData);
+    currentLeagueID = leagueData.previous_league_id;
+  }
+
+  // now that every season's ID is known, fetch all of their users/rosters concurrently
+  const seasons = await waitForAll(
+    ...leagueIDs.map(async (id, ix) => {
+      const [usersRaw, rostersRaw] = await waitForAll(
+        fetch(`https://api.sleeper.app/v1/league/${id}/users`, {
+          compress: true,
+          signal: timeoutSignal(),
+        }),
+        fetch(`https://api.sleeper.app/v1/league/${id}/rosters`, {
+          compress: true,
+          signal: timeoutSignal(),
+        })
+      );
+      const [users, rosters] = await waitForAll(
+        usersRaw.json(),
+        rostersRaw.json()
+      );
+      return { users, rosters, leagueData: seasonLeagueData[ix] };
+    })
+  );
+
   let teamManagersMap = {};
   let finalUsers = {};
   let currentSeason = null;
 
-  // loop through all seasons and create a [year][roster_id]: team, managers object
-  while (currentLeagueID && currentLeagueID != 0) {
-    const [usersRaw, leagueData, rostersRaw] = await waitForAll(
-      fetch(`https://api.sleeper.app/v1/league/${currentLeagueID}/users`, {
-        compress: true,
-      }),
-      getLeagueData(currentLeagueID),
-      fetch(`https://api.sleeper.app/v1/league/${currentLeagueID}/rosters`, {
-        compress: true,
-      })
-    ).catch((err) => {
-      console.error(err);
-    });
-
-    const [users, rosters] = await waitForAll(
-      usersRaw.json(),
-      rostersRaw.json()
-    ).catch((err) => {
-      console.error(err);
-    });
-
+  // process seasons in order (most recent first) so the dedup below keeps the newest data
+  for (const { users, rosters, leagueData } of seasons) {
     const year = parseInt(leagueData.season);
-    currentLeagueID = leagueData.previous_league_id;
     if (!currentSeason) {
       currentSeason = year;
     }
