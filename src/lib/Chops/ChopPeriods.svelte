@@ -41,28 +41,71 @@
   // the new arrays are too similar to the old ones for Svelte to pick up the difference
   let rand;
 
+  // "actual" once real scores exist, teams are tied at 0 beforehand so this
+  // already falls back to projected order (see sortTeams) - no separate state needed pre-kickoff
+  let sortBy = "actual";
+
+  // the matchup data's own totalProjectedPoints is only populated for weeks
+  // that haven't been played yet (see setBestBallLineups), so it's NaN for
+  // any already-played week - recompute it here instead. This mirrors
+  // TeamEntry's own per-player display total (actual points once a player
+  // has scored, their weekly projection otherwise) so the sort/diff always
+  // agree with the number already on screen instead of silently swapping it
+  // for a different "pure pre-game projection" figure.
+  const sumBlendedPoints = (starters, points, week) =>
+    (starters || []).reduce((sum, playerId, i) => {
+      if (!playerId || playerId == 0) return sum;
+      const actual = points?.[i] || 0;
+      if (actual !== 0) return sum + actual;
+      const proj = players?.[playerId]?.wi?.[week]?.p;
+      return sum + (proj ? parseFloat(proj) : 0);
+    }, 0);
+
+  const sortTeams = (teams) => {
+    const sorted = [...teams];
+    sorted.sort((a, b) => {
+      if (sortBy === "projected") {
+        return b.projectedTotal - a.projectedTotal;
+      }
+      if (a.totalPoints !== b.totalPoints) {
+        return b.totalPoints - a.totalPoints;
+      }
+      return b.projectedTotal - a.projectedTotal;
+    });
+    return sorted;
+  };
+
   const processDisplayChop = (newWeek) => {
     const chop = chopPeriods[newWeek - 1];
 
     weekA = chop.weekA;
     weekB = chop.weekB;
 
-    teamArray = chop.teams;
+    const teamsWithProjections = chop.teams.map((team) => ({
+      ...team,
+      projectedTotal:
+        sumBlendedPoints(team.startersA, team.pointsA, weekA) +
+        sumBlendedPoints(team.startersB, team.pointsB, weekB),
+    }));
 
-    // teamArray.sort((a, b) => {
-    //     // Ensure eliminated teams are always at the end
-    //     if (a.isEliminated && !b.isEliminated) return 1;
-    //     if (!a.isEliminated && b.isEliminated) return -1;
-    //
-    //
-    //     // Now handle the points comparison
-    //     const totalA = a.pointsA.reduce((acc, cur) => acc + cur, 0) + a.pointsB.reduce((acc, cur) => acc + cur, 0);
-    //     const totalB = b.pointsA.reduce((acc, cur) => acc + cur, 0) + b.pointsB.reduce((acc, cur) => acc + cur, 0);
-    //     return totalB - totalA;
-    // });
+    teamArray = sortTeams(teamsWithProjections);
 
     rand = Math.random();
   };
+
+  const toggleSort = () => {
+    sortBy = sortBy === "actual" ? "projected" : "actual";
+    teamArray = sortTeams(teamArray);
+    rand = Math.random();
+  };
+
+  // once any real points are in, let the user compare against the gap to the team above them
+  $: hasActualPoints = teamArray.some((team) => team.totalPoints > 0);
+
+  $: sortMetric = sortBy === "projected" ? "projectedTotal" : "totalPoints";
+  $: diffs = teamArray.map((team, ix) =>
+    ix === 0 ? null : Math.max(0, teamArray[ix - 1][sortMetric] - team[sortMetric])
+  );
 
   let active;
 
@@ -96,7 +139,15 @@
   </div>
   <div class="chopHeader">
     <div class="weekLabels">
-      <p class="teamNameLabel">Team Name</p>
+      <p class="teamNameLabel">
+        Team Name
+        {#if hasActualPoints}
+          <span class="sortToggle" on:click={toggleSort}>
+            <Icon class="material-icons sortIcon">swap_vert</Icon>
+            Sort: {sortBy === "actual" ? "Actual" : "Projected"}
+          </span>
+        {/if}
+      </p>
       <p class="weekLabel">Week {weekA}</p>
       <p class="weekLabel">Week {weekB}</p>
       <p class="weekLabel">Total</p>
@@ -112,6 +163,7 @@
       {leagueTeamManagers}
       {weekA}
       {weekB}
+      diff={hasActualPoints ? diffs[ix] : null}
     />
   {/each}
 </div>
@@ -187,5 +239,28 @@
 
   .teamNameLabel {
     flex-grow: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sortToggle {
+    display: flex;
+    align-items: center;
+    font-size: 0.85em;
+    font-weight: normal;
+    text-transform: none;
+    color: #888;
+    cursor: pointer;
+  }
+
+  .sortToggle:hover {
+    color: #00316b;
+  }
+
+  :global(.sortIcon) {
+    font-size: 1.2em;
+    height: 18px;
+    width: 18px;
   }
 </style>

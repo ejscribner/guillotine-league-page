@@ -8,7 +8,10 @@ import {
   homepageText,
   enableBlog,
 } from "./leagueInfo";
-import { getLeagueTransactions } from "./helperFunctions/leagueTransactions";
+import {
+  getLeagueTransactions,
+  getRecentTransactions,
+} from "./helperFunctions/leagueTransactions";
 import { getNflState } from "./helperFunctions/nflState";
 import { getLeagueRosters } from "./helperFunctions/leagueRosters";
 import { getLeagueTeamManagers } from "./helperFunctions/leagueTeamManagers";
@@ -49,6 +52,7 @@ export {
   managers,
   getLeagueData,
   getLeagueTransactions,
+  getRecentTransactions,
   getNflState,
   getLeagueRosters,
   getLeagueTeamManagers,

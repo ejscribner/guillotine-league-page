@@ -6,6 +6,66 @@ import { get } from "svelte/store";
 import { transactionsStore } from "$lib/stores";
 import { browser } from "$app/environment";
 import { getLeagueTeamManagers } from "./leagueTeamManagers";
+import { timeoutSignal } from "./fetchTimeout";
+
+// A lightweight alternative to getLeagueTransactions for previews (e.g. the
+// home page's "recent moves" widget): that function walks every week of
+// every season and digests the entire multi-season history just to slice
+// off 3 of each type. This instead fetches recent weeks newest-first and
+// stops as soon as it has enough, which is normally just 1-2 requests
+// instead of one per week of every season the league has existed.
+export const getRecentTransactions = async (minCount = 3) => {
+  const nflState = await getNflState();
+  let week = 18;
+  if (nflState.season_type == "regular") {
+    week = nflState.week;
+  }
+  week = week > 0 ? week : 1;
+
+  const currentSeason = (await getLeagueData()).season;
+
+  const trades = [];
+  const waivers = [];
+
+  let currentLeagueID = leagueID;
+  let currentWeek = week;
+
+  const enoughFound = () => trades.length >= minCount && waivers.length >= minCount;
+
+  while (currentLeagueID && currentLeagueID != 0 && !enoughFound()) {
+    const leagueData = await getLeagueData(currentLeagueID);
+
+    while (currentWeek > 0 && !enoughFound()) {
+      const res = await fetch(
+        `https://api.sleeper.app/v1/league/${currentLeagueID}/transactions/${currentWeek}`,
+        { compress: true, signal: timeoutSignal() }
+      );
+      if (res.ok) {
+        const weekTransactions = (await res.json()).sort(
+          (a, b) => b.status_updated - a.status_updated
+        );
+        for (const transaction of weekTransactions) {
+          const { digestedTransaction, success } = digestTransaction({
+            transaction,
+            currentSeason,
+          });
+          if (!success) continue;
+          if (digestedTransaction.type === "trade") {
+            if (trades.length < minCount) trades.push(digestedTransaction);
+          } else if (waivers.length < minCount) {
+            waivers.push(digestedTransaction);
+          }
+        }
+      }
+      currentWeek--;
+    }
+
+    currentLeagueID = leagueData.previous_league_id;
+    currentWeek = 18;
+  }
+
+  return { trades, waivers };
+};
 
 export const getLeagueTransactions = async (preview, refresh = false) => {
   const transactionsStoreVal = get(transactionsStore);
