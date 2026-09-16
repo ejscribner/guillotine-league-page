@@ -1,7 +1,7 @@
 <script>
   import { goto } from "$app/navigation";
   import {
-    getLeagueTransactions,
+    getRecentTransactions,
     getLeagueTeamManagers,
     loadPlayers,
     waitForAll,
@@ -17,24 +17,16 @@
   let leagueTeamManagers;
 
   onMount(async () => {
-    const [
-      transactionsData,
-      playersData,
-      leagueTeamManagersData,
-    ] = await waitForAll(
-      getLeagueTransactions(true),
-      loadPlayers(null),
-      getLeagueTeamManagers()
-    );
+    const [transactionsData, playersData, leagueTeamManagersData] =
+      await waitForAll(
+        getRecentTransactions(),
+        loadPlayers(null),
+        getLeagueTeamManagers()
+      );
     players = playersData.players;
-    transactions = transactionsData.transactions;
+    transactions = transactionsData;
     leagueTeamManagers = leagueTeamManagersData;
     loading = false;
-
-    if (transactionsData.stale) {
-      const newTransactions = await getLeagueTransactions(true, true);
-      transactions = newTransactions.transactions;
-    }
 
     if (playersData.stale) {
       const newPlayersData = await loadPlayers(true);
