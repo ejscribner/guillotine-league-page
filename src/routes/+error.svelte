@@ -1,13 +1,29 @@
+<script>
+  import { page } from "$app/stores";
+</script>
+
 <div class="main">
-  <h4>Hut, Hut, Blue 404!</h4>
-  <div class="footballHolder">
-    <img
-      class="football"
-      src="/deflated-football.png"
-      alt="deflated football"
-    />
-  </div>
-  <h5>Nothing Here... Try Another Page!</h5>
+  {#if $page.status === 404}
+    <h4>Hut, Hut, Blue 404!</h4>
+    <div class="footballHolder">
+      <img
+        class="football"
+        src="/deflated-football.png"
+        alt="deflated football"
+      />
+    </div>
+    <h5>Nothing Here... Try Another Page!</h5>
+  {:else}
+    <h4>Something Went Wrong ({$page.status})</h4>
+    <div class="footballHolder">
+      <img
+        class="football"
+        src="/deflated-football.png"
+        alt="deflated football"
+      />
+    </div>
+    <h5>{$page.error?.message ?? "Please try refreshing the page."}</h5>
+  {/if}
 </div>
 
 <style>

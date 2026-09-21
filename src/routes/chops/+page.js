@@ -6,6 +6,8 @@ import {
   loadPlayers,
 } from "$lib/utils/helper";
 
+export const trailingSlash = "never";
+
 export async function load({ url, fetch }) {
   const queryWeek = url?.searchParams?.get("week");
 
