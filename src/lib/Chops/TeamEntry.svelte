@@ -78,8 +78,8 @@
       const away = digestStarter(startersB[i], pointsB[i], weekB);
       // const awayStarter = awayStarters ? awayStarters[i] : null;
       // const away = digestStarter(awayStarter, awayPoint);
-      projectionATotal += home.points === 0 ? home.projection : home.points;
-      projectionBTotal += away.points === 0 ? away.projection : away.points;
+      projectionATotal += home.projection;
+      projectionBTotal += away.projection;
       // awayProjectionTotal += away ? away.projection : 0;
       localStarters.push({ home, away });
     }
@@ -104,10 +104,14 @@
     const player = players[starter];
     let name =
       player.pos == "DEF" ? player.ln : `${player.fn[0]}. ${player.ln}`;
-    let projection = 0;
+    let pregameProjection = 0;
     if (player.wi && player.wi[week]) {
-      projection = parseFloat(player.wi[week].p);
+      pregameProjection = parseFloat(player.wi[week].p);
     }
+    // Once a player has actually scored, show their live points here too -
+    // matches Sleeper's blended live total and keeps this number consistent
+    // with the team total it's summed into (see digestStarters).
+    const projection = points ? points : pregameProjection;
     return {
       name,
       avatar:
